@@ -1,32 +1,52 @@
-# ✅ CHECKLIST RÁPIDO - Despliegue en Render
+# ✅ CHECKLIST RÁPIDO - Despliegue en Railway + Vercel
 
 ## Antes de empezar:
-- [ ] Tienes cuenta en GitHub
-- [ ] Tienes cuenta en Render.com
+- [x] Código en GitHub: https://github.com/dgonzalez15/pruebaTEK.git
+- [ ] Cuenta en Railway.app
+- [ ] Cuenta en Vercel.com
 
-## Backend:
-- [ ] Código subido a GitHub
-- [ ] Base de datos MySQL creada en Render
-- [ ] Backend desplegado en Render
-- [ ] Variables de entorno configuradas
-- [ ] APP_KEY generada
-- [ ] Credenciales de BD configuradas
-- [ ] Servicio en estado "Live" (verde)
+## Railway (Backend + MySQL):
+- [ ] Proyecto creado en Railway
+- [ ] MySQL provisionado
+- [ ] Backend conectado desde GitHub
+- [ ] Root Directory: `peluqueria-anita/backend-api`
+- [ ] Variables de entorno configuradas:
+  - [ ] APP_KEY: `base64:Ld+T3YJJUo1eqo8x4ihiGFH5VCHP3RS50qZKCEeejdY=`
+  - [ ] DB_CONNECTION=mysql
+  - [ ] DB_HOST=${{MySQL.MYSQLHOST}}
+  - [ ] DB_PORT=${{MySQL.MYSQLPORT}}
+  - [ ] DB_DATABASE=${{MySQL.MYSQLDATABASE}}
+  - [ ] DB_USERNAME=${{MySQL.MYSQLUSER}}
+  - [ ] DB_PASSWORD=${{MySQL.MYSQLPASSWORD}}
+- [ ] Deploy exitoso
+- [ ] Domain generado
 
-## Frontend:
-- [ ] URL del backend actualizada en `constants.dart`
-- [ ] Código subido a GitHub con los cambios
-- [ ] Frontend desplegado como Static Site
-- [ ] Build completado exitosamente
+## Vercel (Frontend):
+- [ ] Proyecto importado desde GitHub
+- [ ] Root Directory: `peluqueria-anita/mobile-flutter`
+- [ ] Build Command configurado
+- [ ] Output Directory: `build/web`
+- [ ] Deploy exitoso
 
-## Pruebas:
+## Configuración del Frontend:
+- [ ] URL del backend actualizada en `lib/utils/constants.dart`
+- [ ] Cambios pusheados a GitHub
+- [ ] Vercel redespliegado automáticamente
+
+## Base de Datos:
+- [ ] Migraciones ejecutadas (Railway hace esto automáticamente)
+- [ ] Usuarios creados con `railway run php artisan tinker`
+
+## Pruebas Finales:
 - [ ] Frontend carga correctamente
 - [ ] Se puede hacer login
 - [ ] Las APIs responden
+- [ ] Crear cita funciona
+- [ ] Ver citas funciona
 
-## URLs:
-- Frontend: ___________________________
-- Backend: ____________________________
+## URLs Finales:
+- Frontend (Vercel): ___________________________
+- Backend (Railway): ___________________________
 
 ---
 
