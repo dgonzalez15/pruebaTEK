@@ -42,7 +42,7 @@ class AppConstants {
     // En producción (web desplegado), usa la URL del backend en producción
     const String productionUrl = String.fromEnvironment(
       'API_URL',
-      defaultValue: 'https://tu-backend-api.railway.app/api', // Cambiar cuando despliegues el backend
+      defaultValue: 'https://pruebatek-production.up.railway.app/api', // URL real de backend en Railway
     );
     
     if (kIsWeb) {
