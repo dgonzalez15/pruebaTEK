@@ -1,0 +1,221 @@
+<div class="register-container">
+  <div class="register-card">
+    <!-- Header -->
+    <div class="register-header text-center mb-4">
+      <div class="logo mb-3">
+        <i class="fas fa-cut fa-3x text-primary"></i>
+      </div>
+      <h2 class="fw-bold">Peluquería Anita</h2>
+      <p class="text-muted">Crear Nueva Cuenta</p>
+    </div>
+
+    <!-- Register Form -->
+    <form [formGroup]="registerForm" (ngSubmit)="onSubmit()" class="register-form">
+      <!-- Name Field -->
+      <div class="mb-3">
+        <label for="name" class="form-label">
+          <i class="fas fa-user me-2"></i>Nombre Completo
+        </label>
+        <input
+          type="text"
+          class="form-control"
+          id="name"
+          formControlName="name"
+          placeholder="Tu nombre completo"
+          [class.is-invalid]="registerForm.get('name')?.invalid && registerForm.get('name')?.touched"
+        >
+        <div class="invalid-feedback">
+          <small *ngIf="registerForm.get('name')?.errors?.['required']">
+            El nombre es requerido
+          </small>
+          <small *ngIf="registerForm.get('name')?.errors?.['minlength']">
+            El nombre debe tener al menos 2 caracteres
+          </small>
+        </div>
+      </div>
+
+      <!-- Email Field -->
+      <div class="mb-3">
+        <label for="email" class="form-label">
+          <i class="fas fa-envelope me-2"></i>Correo Electrónico
+        </label>
+        <input
+          type="email"
+          class="form-control"
+          id="email"
+          formControlName="email"
+          placeholder="tu@email.com"
+          [class.is-invalid]="registerForm.get('email')?.invalid && registerForm.get('email')?.touched"
+        >
+        <div class="invalid-feedback">
+          <small *ngIf="registerForm.get('email')?.errors?.['required']">
+            El correo electrónico es requerido
+          </small>
+          <small *ngIf="registerForm.get('email')?.errors?.['email']">
+            Ingresa un correo electrónico válido
+          </small>
+        </div>
+      </div>
+
+      <!-- Password Field -->
+      <div class="mb-3">
+        <label for="password" class="form-label">
+          <i class="fas fa-lock me-2"></i>Contraseña
+        </label>
+        <div class="input-group">
+          <input
+            [type]="showPassword ? 'text' : 'password'"
+            class="form-control"
+            id="password"
+            formControlName="password"
+            placeholder="Tu contraseña"
+            [class.is-invalid]="registerForm.get('password')?.invalid && registerForm.get('password')?.touched"
+          >
+          <button
+            type="button"
+            class="btn btn-outline-secondary"
+            (click)="togglePassword()"
+          >
+            <i [class]="showPassword ? 'fas fa-eye-slash' : 'fas fa-eye'"></i>
+          </button>
+        </div>
+        <div class="invalid-feedback d-block" *ngIf="registerForm.get('password')?.invalid && registerForm.get('password')?.touched">
+          <small *ngIf="registerForm.get('password')?.errors?.['required']">
+            La contraseña es requerida
+          </small>
+          <small *ngIf="registerForm.get('password')?.errors?.['minlength']">
+            La contraseña debe tener al menos 8 caracteres
+          </small>
+        </div>
+      </div>
+
+      <!-- Confirm Password Field -->
+      <div class="mb-3">
+        <label for="password_confirmation" class="form-label">
+          <i class="fas fa-lock me-2"></i>Confirmar Contraseña
+        </label>
+        <div class="input-group">
+          <input
+            [type]="showConfirmPassword ? 'text' : 'password'"
+            class="form-control"
+            id="password_confirmation"
+            formControlName="password_confirmation"
+            placeholder="Confirma tu contraseña"
+            [class.is-invalid]="registerForm.get('password_confirmation')?.invalid && registerForm.get('password_confirmation')?.touched"
+          >
+          <button
+            type="button"
+            class="btn btn-outline-secondary"
+            (click)="toggleConfirmPassword()"
+          >
+            <i [class]="showConfirmPassword ? 'fas fa-eye-slash' : 'fas fa-eye'"></i>
+          </button>
+        </div>
+        <div class="invalid-feedback d-block" *ngIf="registerForm.get('password_confirmation')?.invalid && registerForm.get('password_confirmation')?.touched">
+          <small *ngIf="registerForm.get('password_confirmation')?.errors?.['required']">
+            Debes confirmar tu contraseña
+          </small>
+          <small *ngIf="registerForm.errors?.['passwordMismatch'] && registerForm.get('password_confirmation')?.touched">
+            Las contraseñas no coinciden
+          </small>
+        </div>
+      </div>
+
+      <!-- Role Field -->
+      <div class="mb-3">
+        <label for="role" class="form-label">
+          <i class="fas fa-user-tag me-2"></i>Tipo de Usuario
+        </label>
+        <select
+          class="form-select"
+          id="role"
+          formControlName="role"
+          [class.is-invalid]="registerForm.get('role')?.invalid && registerForm.get('role')?.touched"
+        >
+          <option value="">Selecciona un tipo de usuario</option>
+          <option value="admin">Administrador</option>
+          <option value="stylist">Estilista</option>
+          <option value="client">Cliente</option>
+        </select>
+        <div class="invalid-feedback">
+          <small *ngIf="registerForm.get('role')?.errors?.['required']">
+            Debes seleccionar un tipo de usuario
+          </small>
+        </div>
+      </div>
+
+      <!-- Terms and Conditions -->
+      <div class="mb-3 form-check">
+        <input
+          type="checkbox"
+          class="form-check-input"
+          id="acceptTerms"
+          formControlName="acceptTerms"
+          [class.is-invalid]="registerForm.get('acceptTerms')?.invalid && registerForm.get('acceptTerms')?.touched"
+        >
+        <label class="form-check-label" for="acceptTerms">
+          Acepto los <a href="#" class="text-decoration-none">términos y condiciones</a>
+        </label>
+        <div class="invalid-feedback d-block" *ngIf="registerForm.get('acceptTerms')?.invalid && registerForm.get('acceptTerms')?.touched">
+          <small>Debes aceptar los términos y condiciones</small>
+        </div>
+      </div>
+
+      <!-- Error Message -->
+      <div class="alert alert-danger" *ngIf="registerError" role="alert">
+        <i class="fas fa-exclamation-triangle me-2"></i>
+        {{ registerError }}
+      </div>
+
+      <!-- Submit Button -->
+      <div class="d-grid mb-3">
+        <button
+          type="submit"
+          class="btn btn-primary btn-lg"
+          [disabled]="registerForm.invalid || isLoading"
+        >
+          <span *ngIf="isLoading" class="spinner-border spinner-border-sm me-2"></span>
+          <i *ngIf="!isLoading" class="fas fa-user-plus me-2"></i>
+          {{ isLoading ? 'Creando cuenta...' : 'Crear Cuenta' }}
+        </button>
+      </div>
+
+      <!-- Login Link -->
+      <div class="text-center">
+        <p class="mb-0">
+          <small class="text-muted">¿Ya tienes cuenta?</small>
+          <a routerLink="/login" class="text-decoration-none ms-1">
+            <small>Inicia sesión aquí</small>
+          </a>
+        </p>
+      </div>
+    </form>
+  </div>
+
+  <!-- Background Benefits -->
+  <div class="benefits-section">
+    <div class="row">
+      <div class="col-md-4">
+        <div class="benefit-item text-center">
+          <i class="fas fa-shield-alt fa-2x text-white mb-3"></i>
+          <h5 class="text-white">Seguro y Confiable</h5>
+          <p class="text-white-50">Tus datos están protegidos con encriptación</p>
+        </div>
+      </div>
+      <div class="col-md-4">
+        <div class="benefit-item text-center">
+          <i class="fas fa-clock fa-2x text-white mb-3"></i>
+          <h5 class="text-white">Disponible 24/7</h5>
+          <p class="text-white-50">Accede a tu cuenta en cualquier momento</p>
+        </div>
+      </div>
+      <div class="col-md-4">
+        <div class="benefit-item text-center">
+          <i class="fas fa-headset fa-2x text-white mb-3"></i>
+          <h5 class="text-white">Soporte Premium</h5>
+          <p class="text-white-50">Asistencia técnica especializada</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

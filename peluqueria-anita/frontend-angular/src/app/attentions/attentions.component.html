@@ -1,0 +1,655 @@
+<div class="container-fluid">
+  <!-- Debug Banner -->
+  <!-- <div class="alert alert-info alert-dismissible fade show" role="alert">
+    <strong>🔍 Estado Debug:</strong> 
+    Cargando: {{ loading }} | 
+    Atenciones: {{ attentions.length || 0 }} | 
+    Total páginas: {{ totalPages }} | 
+    Página actual: {{ currentPage }} |
+    Stats: {{ stats | json }}
+    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+  </div> -->
+
+  <!-- Header -->
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <h2 class="mb-0">
+      <i class="fas fa-hand-sparkles me-2"></i>
+      Gestión de Atenciones
+    </h2>
+    <button 
+      type="button" 
+      class="btn btn-primary"
+      (click)="openModal()">
+      <i class="fas fa-plus me-2"></i>
+      Nueva Atención
+    </button>
+  </div>
+
+  <!-- Estadísticas -->
+  <div class="row mb-4">
+    <div class="col-xl-3 col-md-6 mb-4">
+      <div class="card border-left-primary shadow h-100 py-2">
+        <div class="card-body">
+          <div class="row no-gutters align-items-center">
+            <div class="col mr-2">
+              <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
+                Atenciones Hoy
+              </div>
+              <div class="h5 mb-0 font-weight-bold text-gray-800">
+                {{ stats.today || 0 }}
+              </div>
+            </div>
+            <div class="col-auto">
+              <i class="fas fa-calendar-day fa-2x text-gray-300"></i>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-xl-3 col-md-6 mb-4">
+      <div class="card border-left-success shadow h-100 py-2">
+        <div class="card-body">
+          <div class="row no-gutters align-items-center">
+            <div class="col mr-2">
+              <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
+                Atenciones Completadas
+              </div>
+              <div class="h5 mb-0 font-weight-bold text-gray-800">
+                {{ stats.completed || 0 }}
+              </div>
+            </div>
+            <div class="col-auto">
+              <i class="fas fa-check-circle fa-2x text-gray-300"></i>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-xl-3 col-md-6 mb-4">
+      <div class="card border-left-info shadow h-100 py-2">
+        <div class="card-body">
+          <div class="row no-gutters align-items-center">
+            <div class="col mr-2">
+              <div class="text-xs font-weight-bold text-info text-uppercase mb-1">
+                En Progreso
+              </div>
+              <div class="h5 mb-0 font-weight-bold text-gray-800">
+                {{ stats.in_progress || 0 }}
+              </div>
+            </div>
+            <div class="col-auto">
+              <i class="fas fa-clock fa-2x text-gray-300"></i>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-xl-3 col-md-6 mb-4">
+      <div class="card border-left-warning shadow h-100 py-2">
+        <div class="card-body">
+          <div class="row no-gutters align-items-center">
+            <div class="col mr-2">
+              <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">
+                Total Atenciones
+              </div>
+              <div class="h5 mb-0 font-weight-bold text-gray-800">
+                {{ stats.total || 0 }}
+              </div>
+            </div>
+            <div class="col-auto">
+              <i class="fas fa-list fa-2x text-gray-300"></i>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Filtros -->
+  <div class="card shadow mb-4">
+    <div class="card-header py-3">
+      <h6 class="m-0 font-weight-bold text-primary">Filtros</h6>
+    </div>
+    <div class="card-body">
+      <div class="row">
+        <div class="col-md-3 mb-3">
+          <label for="search" class="form-label">Buscar</label>
+          <input 
+            type="text" 
+            id="search"
+            class="form-control" 
+            placeholder="Cliente, observaciones..."
+            [(ngModel)]="filters.search"
+            (input)="onSearchChange()">
+        </div>
+
+        <div class="col-md-3 mb-3">
+          <label for="status" class="form-label">Estado</label>
+          <select 
+            id="status"
+            class="form-select" 
+            [(ngModel)]="filters.status"
+            (change)="onFilterChange()">
+            <option value="">Todos los estados</option>
+            <option *ngFor="let status of statusTypes" [value]="status.value">
+              {{ status.label }}
+            </option>
+          </select>
+        </div>
+
+        <div class="col-md-3 mb-3">
+          <label for="date" class="form-label">Fecha</label>
+          <input 
+            type="date" 
+            id="date"
+            class="form-control"
+            [(ngModel)]="filters.date"
+            (change)="onFilterChange()">
+        </div>
+
+        <div class="col-md-3 mb-3">
+          <label for="client" class="form-label">Cliente</label>
+          <select 
+            id="client"
+            class="form-select" 
+            [(ngModel)]="filters.client_id"
+            (change)="onFilterChange()">
+            <option value="">Todos los clientes</option>
+            <option *ngFor="let client of clients" [value]="client.id">
+              {{ client.name }}
+            </option>
+          </select>
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="col-md-3 mb-3">
+          <label for="sortBy" class="form-label">Ordenar por</label>
+          <select 
+            id="sortBy"
+            class="form-select" 
+            [(ngModel)]="filters.sort_by"
+            (change)="onFilterChange()">
+            <option value="attention_date">Fecha de atención</option>
+            <option value="created_at">Fecha de creación</option>
+            <option value="service_price">Precio del servicio</option>
+            <option value="status">Estado</option>
+          </select>
+        </div>
+
+        <div class="col-md-3 mb-3">
+          <label for="sortOrder" class="form-label">Orden</label>
+          <select 
+            id="sortOrder"
+            class="form-select" 
+            [(ngModel)]="filters.sort_order"
+            (change)="onFilterChange()">
+            <option value="desc">Descendente</option>
+            <option value="asc">Ascendente</option>
+          </select>
+        </div>
+
+        <div class="col-md-3 mb-3">
+          <label for="perPage" class="form-label">Resultados por página</label>
+          <select 
+            id="perPage"
+            class="form-select" 
+            [(ngModel)]="filters.per_page"
+            (change)="onFilterChange()">
+            <option value="10">10</option>
+            <option value="15">15</option>
+            <option value="25">25</option>
+            <option value="50">50</option>
+          </select>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Tabla de Atenciones -->
+  <div class="card shadow mb-4">
+    <div class="card-header py-3 d-flex justify-content-between align-items-center">
+      <h6 class="m-0 font-weight-bold text-primary">
+        Lista de Atenciones ({{ totalItems }} resultados)
+      </h6>
+      <!-- Debug info temporal -->
+      <!-- <small class="text-muted">
+        Loading: {{ loading }} | Attentions: {{ attentions.length || 0 }} | Auth: {{ authService.isAuthenticated() }}
+      </small> -->
+    </div>
+    <div class="card-body">
+      <!-- Debug info más visible -->
+      <!-- <div class="alert alert-info mb-3">
+        <strong>Debug Info:</strong> 
+        Loading: {{ loading }} | 
+        Attentions: {{ attentions.length || 0 }} | 
+        Auth: {{ authService.isAuthenticated() }} |
+        Total Items: {{ totalItems }} |
+        Has Stats: {{ stats.today !== undefined }}
+      </div> -->
+      
+      <div class="table-responsive">
+        <!-- Mostrar siempre la tabla, independientemente del loading -->
+        <table class="table table-bordered" width="100%" cellspacing="0">
+          <thead>
+            <tr>
+              <th>Fecha</th>
+              <th>Cliente</th>
+              <th>Servicio</th>
+              <th>Horario</th>
+              <th>Estado</th>
+              <th>Precio</th>
+              <th>Propina</th>
+              <th>Total</th>
+              <th>Satisfacción</th>
+              <th>Acciones</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let attention of attentions">
+              <td>{{ formatDate(attention.attention_date) }}</td>
+              <td>
+                <div class="fw-bold">{{ attention.client?.name }}</div>
+                <div class="text-muted small">{{ attention.client?.phone }}</div>
+              </td>
+              <td>
+                <div class="fw-bold">{{ attention.service?.name }}</div>
+                <div class="text-muted small">{{ calculateDuration(attention.start_time, attention.end_time) }}</div>
+              </td>
+              <td>
+                <div>{{ formatTime(attention.start_time) }} - {{ formatTime(attention.end_time) }}</div>
+              </td>
+              <td>
+                <span [class]="getStatusBadgeClass(attention.status)">
+                  {{ getStatusText(attention.status) }}
+                </span>
+              </td>
+              <td>{{ formatCurrency(attention.service_price) }}</td>
+              <td>{{ formatCurrency(attention.tip_amount) }}</td>
+              <td class="fw-bold">{{ formatCurrency(getTotalAmount(attention)) }}</td>
+              <td>
+                <span [class]="getSatisfactionBadgeClass(attention.client_satisfaction)">
+                  {{ getSatisfactionText(attention.client_satisfaction) }}
+                </span>
+              </td>
+              <td>
+                <div class="btn-group" role="group">
+                  <!-- Cambio rápido de estado -->
+                  <div class="dropdown">
+                    <button 
+                      class="btn btn-sm btn-outline-secondary dropdown-toggle" 
+                      type="button" 
+                      id="statusDropdown{{ attention.id }}"
+                      data-bs-toggle="dropdown" 
+                      aria-expanded="false"
+                      *ngIf="authService.hasPermission('update_attentions')">
+                      Estado
+                    </button>
+                    <ul class="dropdown-menu" [attr.aria-labelledby]="'statusDropdown' + attention.id">
+                      <li *ngFor="let status of statusTypes">
+                        <a 
+                          class="dropdown-item" 
+                          href="#"
+                          (click)="$event.preventDefault(); updateAttentionStatus(attention, status.value)"
+                          [class.active]="attention.status === status.value">
+                          <span [class]="'badge bg-' + status.color + ' me-2'"></span>
+                          {{ status.label }}
+                        </a>
+                      </li>
+                    </ul>
+                  </div>
+
+                  <!-- Editar -->
+                  <button 
+                    type="button" 
+                    class="btn btn-sm btn-outline-primary ms-1"
+                    (click)="openModal(attention)"
+                    *ngIf="authService.hasPermission('update_attentions')"
+                    title="Editar atención">
+                    <i class="fas fa-edit"></i>
+                  </button>
+
+                  <!-- Eliminar -->
+                  <button 
+                    type="button" 
+                    class="btn btn-sm btn-outline-danger ms-1"
+                    (click)="confirmDelete(attention)"
+                    *ngIf="authService.hasPermission('delete_attentions')"
+                    title="Eliminar atención">
+                    <i class="fas fa-trash"></i>
+                  </button>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+
+        <!-- Mensaje de no hay datos -->
+        <div *ngIf="attentions.length === 0" class="text-center py-4">
+          <i class="fas fa-inbox fa-3x text-muted mb-3"></i>
+          <p class="text-muted">No se encontraron atenciones con los filtros seleccionados</p>
+        </div>
+      </div>
+
+      <!-- Loading -->
+      <div *ngIf="loading" class="d-flex justify-content-center py-4">
+        <div class="spinner-border text-primary" role="status">
+          <span class="visually-hidden">Cargando...</span>
+        </div>
+      </div>
+
+      <!-- Paginación -->
+      <nav *ngIf="totalPages > 1 && !loading" aria-label="Navegación de páginas">
+        <ul class="pagination justify-content-center">
+          <li class="page-item" [class.disabled]="currentPage === 1">
+            <a class="page-link" href="#" (click)="$event.preventDefault(); changePage(currentPage - 1)">
+              Anterior
+            </a>
+          </li>
+          
+          <li 
+            *ngFor="let page of [].constructor(totalPages); let i = index" 
+            class="page-item" 
+            [class.active]="currentPage === i + 1">
+            <a class="page-link" href="#" (click)="$event.preventDefault(); changePage(i + 1)">
+              {{ i + 1 }}
+            </a>
+          </li>
+          
+          <li class="page-item" [class.disabled]="currentPage === totalPages">
+            <a class="page-link" href="#" (click)="$event.preventDefault(); changePage(currentPage + 1)">
+              Siguiente
+            </a>
+          </li>
+        </ul>
+      </nav>
+    </div>
+  </div>
+</div>
+
+<!-- Modal para crear/editar atención -->
+<div class="modal fade" id="attentionModal" tabindex="-1" [class.show]="showModal" [style.display]="showModal ? 'block' : 'none'">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <form [formGroup]="attentionForm" (ngSubmit)="onSubmit()">
+        <div class="modal-header">
+          <h5 class="modal-title">
+            {{ editingAttention ? 'Editar Atención' : 'Nueva Atención' }}
+          </h5>
+          <button type="button" class="btn-close" (click)="closeModal()"></button>
+        </div>
+        
+        <div class="modal-body">
+          <div class="row">
+            <!-- Información básica -->
+            <div class="col-md-6 mb-3">
+              <label for="client_id" class="form-label">Cliente *</label>
+              <select 
+                id="client_id"
+                class="form-select" 
+                formControlName="client_id"
+                [class.is-invalid]="attentionForm.get('client_id')?.invalid && attentionForm.get('client_id')?.touched">
+                <option value="">Seleccione un cliente</option>
+                <option *ngFor="let client of clients" [value]="client.id">
+                  {{ client.name }}
+                </option>
+              </select>
+              <div *ngIf="attentionForm.get('client_id')?.invalid && attentionForm.get('client_id')?.touched" class="invalid-feedback">
+                Cliente es requerido
+              </div>
+            </div>
+
+            <div class="col-md-6 mb-3">
+              <label for="appointment_id" class="form-label">Cita</label>
+              <select 
+                id="appointment_id"
+                class="form-select" 
+                formControlName="appointment_id">
+                <option value="">Seleccione una cita (opcional)</option>
+                <option *ngFor="let appointment of appointments" [value]="appointment.id">
+                  {{ appointment.client?.name }} - {{ formatDate(appointment.appointment_date) }} {{ formatTime(appointment.start_time) }}
+                </option>
+              </select>
+            </div>
+
+            <div class="col-md-6 mb-3">
+              <label for="attention_date" class="form-label">Fecha de Atención *</label>
+              <input 
+                type="date" 
+                id="attention_date"
+                class="form-control"
+                formControlName="attention_date"
+                [class.is-invalid]="attentionForm.get('attention_date')?.invalid && attentionForm.get('attention_date')?.touched">
+              <div *ngIf="attentionForm.get('attention_date')?.invalid && attentionForm.get('attention_date')?.touched" class="invalid-feedback">
+                Fecha de atención es requerida
+              </div>
+            </div>
+
+            <div class="col-md-6 mb-3">
+              <label for="status" class="form-label">Estado *</label>
+              <select 
+                id="status"
+                class="form-select" 
+                formControlName="status"
+                [class.is-invalid]="attentionForm.get('status')?.invalid && attentionForm.get('status')?.touched">
+                <option *ngFor="let status of statusTypes" [value]="status.value">
+                  {{ status.label }}
+                </option>
+              </select>
+            </div>
+
+            <!-- Servicio -->
+            <div class="col-md-6 mb-3">
+              <label for="service_id" class="form-label">Servicio *</label>
+              <select 
+                id="service_id"
+                class="form-select" 
+                formControlName="service_id"
+                [class.is-invalid]="attentionForm.get('service_id')?.invalid && attentionForm.get('service_id')?.touched">
+                <option value="">Seleccione un servicio</option>
+                <option *ngFor="let service of services" [value]="service.id">
+                  {{ service.name }} - {{ formatCurrency(service.price) }} ({{ service.duration }} min)
+                </option>
+              </select>
+              <div *ngIf="attentionForm.get('service_id')?.invalid && attentionForm.get('service_id')?.touched" class="invalid-feedback">
+                Servicio es requerido
+              </div>
+            </div>
+
+            <div class="col-md-6 mb-3">
+              <label for="user_id" class="form-label">Estilista *</label>
+              <select 
+                id="user_id"
+                class="form-select" 
+                formControlName="user_id"
+                [class.is-invalid]="attentionForm.get('user_id')?.invalid && attentionForm.get('user_id')?.touched">
+                <option value="">Seleccione un estilista</option>
+                <option value="1">Anita (Principal)</option>
+                <option value="2">María (Asistente)</option>
+                <option value="3">Carlos (Estilista Senior)</option>
+              </select>
+              <div *ngIf="attentionForm.get('user_id')?.invalid && attentionForm.get('user_id')?.touched" class="invalid-feedback">
+                Estilista es requerido
+              </div>
+            </div>
+
+            <!-- Horarios -->
+            <div class="col-md-6 mb-3">
+              <label for="start_time" class="form-label">Hora de Inicio *</label>
+              <select 
+                id="start_time"
+                class="form-select"
+                formControlName="start_time"
+                (change)="onStartTimeChange()"
+                [class.is-invalid]="attentionForm.get('start_time')?.invalid && attentionForm.get('start_time')?.touched">
+                <option value="">Seleccione una hora</option>
+                <option *ngFor="let slot of availableSlots" [value]="slot">
+                  {{ slot }}
+                </option>
+              </select>
+              <div *ngIf="attentionForm.get('start_time')?.invalid && attentionForm.get('start_time')?.touched" class="invalid-feedback">
+                Hora de inicio es requerida
+              </div>
+            </div>
+
+            <div class="col-md-6 mb-3">
+              <label for="end_time" class="form-label">Hora de Fin *</label>
+              <select
+                id="end_time"
+                class="form-select"
+                formControlName="end_time"
+                [class.is-invalid]="attentionForm.get('end_time')?.invalid && attentionForm.get('end_time')?.touched">
+                <option value="">Seleccione hora de fin</option>
+                <option *ngFor="let slot of availableSlots" [value]="slot">
+                  {{ slot }}
+                </option>
+              </select>
+              <div *ngIf="attentionForm.get('end_time')?.invalid && attentionForm.get('end_time')?.touched" class="invalid-feedback">
+                Hora de fin es requerida
+              </div>
+            </div>
+
+            <!-- Información del servicio -->
+            <div class="col-md-6 mb-3">
+              <label for="service_price" class="form-label">Precio del Servicio *</label>
+              <div class="input-group">
+                <span class="input-group-text">$</span>
+                <input 
+                  type="number" 
+                  id="service_price"
+                  class="form-control"
+                  formControlName="service_price"
+                  min="0"
+                  step="0.01"
+                  [class.is-invalid]="attentionForm.get('service_price')?.invalid && attentionForm.get('service_price')?.touched">
+              </div>
+              <div *ngIf="attentionForm.get('service_price')?.invalid && attentionForm.get('service_price')?.touched" class="invalid-feedback">
+                Precio del servicio es requerido
+              </div>
+            </div>
+
+            <div class="col-md-6 mb-3">
+              <label for="tip_amount" class="form-label">Propina</label>
+              <div class="input-group">
+                <span class="input-group-text">$</span>
+                <input 
+                  type="number" 
+                  id="tip_amount"
+                  class="form-control"
+                  formControlName="tip_amount"
+                  min="0"
+                  step="0.01">
+              </div>
+            </div>
+
+            <!-- Satisfacción del cliente -->
+            <div class="col-md-12 mb-3">
+              <label for="client_satisfaction" class="form-label">Satisfacción del Cliente</label>
+              <select 
+                id="client_satisfaction"
+                class="form-select" 
+                formControlName="client_satisfaction">
+                <option value="">No evaluado</option>
+                <option *ngFor="let satisfaction of satisfactionLevels" [value]="satisfaction.value">
+                  {{ satisfaction.label }}
+                </option>
+              </select>
+            </div>
+
+            <!-- Observaciones y productos -->
+            <div class="col-md-12 mb-3">
+              <label for="observations" class="form-label">Observaciones</label>
+              <textarea 
+                id="observations"
+                class="form-control" 
+                formControlName="observations"
+                rows="3"
+                placeholder="Observaciones sobre el servicio..."></textarea>
+            </div>
+
+            <div class="col-md-12 mb-3">
+              <label for="products_used" class="form-label">Productos Utilizados</label>
+              <textarea 
+                id="products_used"
+                class="form-control" 
+                formControlName="products_used"
+                rows="2"
+                placeholder="Lista de productos utilizados..."></textarea>
+            </div>
+
+            <div class="col-md-12 mb-3">
+              <label for="notes" class="form-label">Notas Adicionales</label>
+              <textarea 
+                id="notes"
+                class="form-control" 
+                formControlName="notes"
+                rows="2"
+                placeholder="Notas adicionales..."></textarea>
+            </div>
+          </div>
+        </div>
+        
+        <div class="modal-footer">
+          <!-- Debug info del formulario -->
+          <!-- <div class="w-100 mb-3">
+            <small class="text-muted">
+              <strong>🔍 Debug Formulario:</strong> 
+              Válido: {{ attentionForm.valid }} | 
+              Inválido: {{ attentionForm.invalid }} | 
+              Errores: {{ getFormErrors() }}
+            </small>
+          </div> -->
+          
+          <button type="button" class="btn btn-secondary" (click)="closeModal()">
+            Cancelar
+          </button>
+          <button 
+            type="submit" 
+            class="btn btn-primary"
+            [disabled]="attentionForm.invalid || loading">
+            <span *ngIf="loading" class="spinner-border spinner-border-sm me-2"></span>
+            {{ editingAttention ? 'Actualizar' : 'Crear' }} Atención
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- Modal de confirmación de eliminación -->
+<div class="modal fade" id="deleteModal" tabindex="-1" [class.show]="showDeleteModal" [style.display]="showDeleteModal ? 'block' : 'none'">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Confirmar Eliminación</h5>
+        <button type="button" class="btn-close" (click)="showDeleteModal = false"></button>
+      </div>
+      <div class="modal-body">
+        <p>¿Está seguro que desea eliminar esta atención?</p>
+        <div *ngIf="deletingAttention" class="alert alert-info">
+          <strong>Cliente:</strong> {{ deletingAttention.client?.name }}<br>
+          <strong>Fecha:</strong> {{ formatDate(deletingAttention.attention_date) }}<br>
+          <strong>Precio:</strong> {{ formatCurrency(deletingAttention.service_price) }}
+        </div>
+        <p class="text-danger"><small>Esta acción no se puede deshacer.</small></p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" (click)="showDeleteModal = false">
+          Cancelar
+        </button>
+        <button type="button" class="btn btn-danger" (click)="deleteAttention()">
+          Eliminar
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Backdrop para modales -->
+<div 
+  *ngIf="showModal || showDeleteModal" 
+  class="modal-backdrop fade show">
+</div>

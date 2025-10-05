@@ -1,0 +1,218 @@
+<!-- Welcome Section -->
+<div class="welcome-section mb-4">
+  <div class="row align-items-center">
+    <div class="col-md-8">
+      <h1 class="welcome-title">
+        <i class="fas fa-tachometer-alt me-3"></i>Dashboard
+      </h1>
+      <p class="welcome-subtitle text-muted">
+        Bienvenido de vuelta, aquí tienes un resumen de tu peluquería
+      </p>
+    </div>
+    <div class="col-md-4 text-md-end">
+      <div class="date-time">
+        <i class="fas fa-calendar-day me-2"></i>
+        <span>{{ currentDate | date:'EEEE, d MMMM y':'es-ES' }}</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Stats Cards -->
+<div class="row mb-4">
+  <div class="col-xl-3 col-md-6 mb-4">
+    <div class="card stats-card border-0 shadow-sm h-100">
+      <div class="card-body">
+        <div class="d-flex align-items-center">
+          <div class="stats-icon bg-primary">
+            <i class="fas fa-calendar-check"></i>
+          </div>
+          <div class="stats-content ms-3">
+            <div class="stats-number">{{ todayAppointments }}</div>
+            <div class="stats-label">Citas de Hoy</div>
+          </div>
+        </div>
+        <div class="stats-trend mt-2">
+          <i class="fas fa-arrow-up text-success me-1"></i>
+          <span class="text-success">+5</span>
+          <small class="text-muted">vs ayer</small>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-xl-3 col-md-6 mb-4">
+    <div class="card stats-card border-0 shadow-sm h-100">
+      <div class="card-body">
+        <div class="d-flex align-items-center">
+          <div class="stats-icon bg-success">
+            <i class="fas fa-users"></i>
+          </div>
+          <div class="stats-content ms-3">
+            <div class="stats-number">{{ totalClients }}</div>
+            <div class="stats-label">Clientes Totales</div>
+          </div>
+        </div>
+        <div class="stats-trend mt-2">
+          <i class="fas fa-arrow-up text-success me-1"></i>
+          <span class="text-success">+3</span>
+          <small class="text-muted">este mes</small>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-xl-3 col-md-6 mb-4">
+    <div class="card stats-card border-0 shadow-sm h-100">
+      <div class="card-body">
+        <div class="d-flex align-items-center">
+          <div class="stats-icon bg-warning">
+            <i class="fas fa-dollar-sign"></i>
+          </div>
+          <div class="stats-content ms-3">
+            <div class="stats-number">${{ monthlyRevenue }}</div>
+            <div class="stats-label">Ingresos del Mes</div>
+          </div>
+        </div>
+        <div class="stats-trend mt-2">
+          <i class="fas fa-arrow-up text-success me-1"></i>
+          <span class="text-success">+12%</span>
+          <small class="text-muted">vs mes anterior</small>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-xl-3 col-md-6 mb-4">
+    <div class="card stats-card border-0 shadow-sm h-100">
+      <div class="card-body">
+        <div class="d-flex align-items-center">
+          <div class="stats-icon bg-info">
+            <i class="fas fa-scissors"></i>
+          </div>
+          <div class="stats-content ms-3">
+            <div class="stats-number">{{ totalServices }}</div>
+            <div class="stats-label">Servicios Activos</div>
+          </div>
+        </div>
+        <div class="stats-trend mt-2">
+          <i class="fas fa-minus text-warning me-1"></i>
+          <span class="text-warning">Sin cambios</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Main Content Row -->
+<div class="row">
+  <!-- Today's Appointments -->
+  <div class="col-lg-8 mb-4">
+    <div class="card border-0 shadow-sm">
+      <div class="card-header bg-white py-3">
+        <div class="d-flex justify-content-between align-items-center">
+          <h5 class="mb-0">
+            <i class="fas fa-calendar-day me-2 text-primary"></i>
+            Citas de Hoy
+          </h5>
+          <button class="btn btn-primary btn-sm" (click)="navigateToNewAppointment()">
+            <i class="fas fa-plus me-1"></i>Nueva Cita
+          </button>
+        </div>
+      </div>
+      <div class="card-body">
+        <div class="appointments-list">
+          <div class="appointment-item" *ngFor="let appointment of upcomingAppointments">
+            <div class="d-flex align-items-center">
+              <div class="appointment-time">
+                <div class="time">{{ appointment.time }}</div>
+                <div class="duration text-muted">{{ appointment.duration }}</div>
+              </div>
+              <div class="appointment-details ms-3 flex-grow-1">
+                <div class="client-name fw-bold">{{ appointment.clientName }}</div>
+                <div class="service-name text-muted">{{ appointment.serviceName }}</div>
+              </div>
+              <div class="appointment-status">
+                <span class="badge" [ngClass]="'bg-' + appointment.statusColor">
+                  {{ appointment.status }}
+                </span>
+              </div>
+              <div class="appointment-actions ms-2">
+                <div class="btn-group" role="group">
+                  <button class="btn btn-sm btn-outline-primary" (click)="editAppointment(appointment.id)" title="Editar cita">
+                    <i class="fas fa-edit"></i>
+                  </button>
+                  <button class="btn btn-sm btn-outline-success" (click)="confirmAppointment(appointment.id)" title="Confirmar cita">
+                    <i class="fas fa-check"></i>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <div class="empty-state text-center py-4" *ngIf="upcomingAppointments.length === 0">
+            <i class="fas fa-calendar-check fa-3x text-muted mb-3"></i>
+            <h6 class="text-muted">No hay citas programadas para hoy</h6>
+            <button class="btn btn-primary" (click)="navigateToNewAppointment()">
+              <i class="fas fa-plus me-1"></i>Programar Primera Cita
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Quick Actions & Stats -->
+  <div class="col-lg-4 mb-4">
+    <!-- Quick Actions -->
+    <div class="card border-0 shadow-sm mb-4">
+      <div class="card-header bg-white py-3">
+        <h5 class="mb-0">
+          <i class="fas fa-bolt me-2 text-warning"></i>
+          Acciones Rápidas
+        </h5>
+      </div>
+      <div class="card-body">
+        <div class="d-grid gap-2">
+          <button class="btn btn-outline-primary" (click)="navigateToNewAppointment()">
+            <i class="fas fa-plus me-2"></i>Nueva Cita
+          </button>
+          <button class="btn btn-outline-success" (click)="navigateToNewClient()">
+            <i class="fas fa-user-plus me-2"></i>Nuevo Cliente
+          </button>
+          <button class="btn btn-outline-info" (click)="navigateToNewService()">
+            <i class="fas fa-cut me-2"></i>Nuevo Servicio
+          </button>
+          <button class="btn btn-outline-warning" (click)="navigateToReports()">
+            <i class="fas fa-chart-line me-2"></i>Ver Estadísticas
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Recent Activity -->
+    <div class="card border-0 shadow-sm">
+      <div class="card-header bg-white py-3">
+        <h5 class="mb-0">
+          <i class="fas fa-clock me-2 text-info"></i>
+          Actividad Reciente
+        </h5>
+      </div>
+      <div class="card-body">
+        <div class="activity-list">
+          <div class="activity-item" *ngFor="let activity of recentActivities">
+            <div class="d-flex">
+              <div class="activity-icon">
+                <i [class]="activity.icon" [ngClass]="'text-' + activity.color"></i>
+              </div>
+              <div class="activity-content ms-3 flex-grow-1">
+                <div class="activity-text">{{ activity.text }}</div>
+                <div class="activity-time text-muted">{{ activity.time }}</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

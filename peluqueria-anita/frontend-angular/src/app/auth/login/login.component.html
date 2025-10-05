@@ -1,0 +1,146 @@
+<div class="login-container">
+  <div class="login-card">
+    <!-- Header -->
+    <div class="login-header text-center mb-4">
+      <div class="logo mb-3">
+        <i class="fas fa-cut fa-3x text-primary"></i>
+      </div>
+      <h2 class="fw-bold">Peluquería Anita</h2>
+      <p class="text-muted">Iniciar Sesión</p>
+    </div>
+
+    <!-- Login Form -->
+    <form [formGroup]="loginForm" (ngSubmit)="onSubmit()" class="login-form">
+      <!-- Email Field -->
+      <div class="mb-3">
+        <label for="email" class="form-label">
+          <i class="fas fa-envelope me-2"></i>Correo Electrónico
+        </label>
+        <input
+          type="email"
+          class="form-control"
+          id="email"
+          formControlName="email"
+          placeholder="tu@email.com"
+          [class.is-invalid]="loginForm.get('email')?.invalid && loginForm.get('email')?.touched"
+        >
+        <div class="invalid-feedback">
+          <small *ngIf="loginForm.get('email')?.errors?.['required']">
+            El correo electrónico es requerido
+          </small>
+          <small *ngIf="loginForm.get('email')?.errors?.['email']">
+            Ingresa un correo electrónico válido
+          </small>
+        </div>
+      </div>
+
+      <!-- Password Field -->
+      <div class="mb-3">
+        <label for="password" class="form-label">
+          <i class="fas fa-lock me-2"></i>Contraseña
+        </label>
+        <div class="input-group">
+          <input
+            [type]="showPassword ? 'text' : 'password'"
+            class="form-control"
+            id="password"
+            formControlName="password"
+            placeholder="Tu contraseña"
+            [class.is-invalid]="loginForm.get('password')?.invalid && loginForm.get('password')?.touched"
+          >
+          <button
+            type="button"
+            class="btn btn-outline-secondary"
+            (click)="togglePassword()"
+          >
+            <i [class]="showPassword ? 'fas fa-eye-slash' : 'fas fa-eye'"></i>
+          </button>
+        </div>
+        <div class="invalid-feedback d-block" *ngIf="loginForm.get('password')?.invalid && loginForm.get('password')?.touched">
+          <small *ngIf="loginForm.get('password')?.errors?.['required']">
+            La contraseña es requerida
+          </small>
+          <small *ngIf="loginForm.get('password')?.errors?.['minlength']">
+            La contraseña debe tener al menos 6 caracteres
+          </small>
+        </div>
+      </div>
+
+      <!-- Remember Me -->
+      <div class="mb-3 form-check">
+        <input
+          type="checkbox"
+          class="form-check-input"
+          id="rememberMe"
+          formControlName="rememberMe"
+        >
+        <label class="form-check-label" for="rememberMe">
+          Recordarme
+        </label>
+      </div>
+
+      <!-- Error Message -->
+      <div class="alert alert-danger" *ngIf="loginError" role="alert">
+        <i class="fas fa-exclamation-triangle me-2"></i>
+        {{ loginError }}
+      </div>
+
+      <!-- Submit Button -->
+      <div class="d-grid mb-3">
+        <button
+          type="submit"
+          class="btn btn-primary btn-lg"
+          [disabled]="loginForm.invalid || isLoading"
+        >
+          <span *ngIf="isLoading" class="spinner-border spinner-border-sm me-2"></span>
+          <i *ngIf="!isLoading" class="fas fa-sign-in-alt me-2"></i>
+          {{ isLoading ? 'Iniciando sesión...' : 'Iniciar Sesión' }}
+        </button>
+      </div>
+
+      <!-- Forgot Password -->
+      <div class="text-center mb-3">
+        <a href="#" class="text-decoration-none">
+          <small>¿Olvidaste tu contraseña?</small>
+        </a>
+      </div>
+
+      <!-- Register Link -->
+      <div class="text-center">
+        <p class="mb-0">
+          <small class="text-muted">¿No tienes cuenta?</small>
+          <a routerLink="/register" class="text-decoration-none ms-1">
+            <small>Regístrate aquí</small>
+          </a>
+        </p>
+      </div>
+    </form>
+  </div>
+
+  <!-- Background Features -->
+  <div class="features-section">
+    <div class="row">
+      <div class="col-md-4">
+        <div class="feature-item text-center">
+          <i class="fas fa-calendar-check fa-2x text-primary mb-3"></i>
+          <h5>Gestión de Citas</h5>
+          <p class="text-muted">Programa y administra citas fácilmente</p>
+        </div>
+      </div>
+      <div class="col-md-4">
+        <div class="feature-item text-center">
+          <i class="fas fa-users fa-2x text-primary mb-3"></i>
+          <h5>Clientes</h5>
+          <p class="text-muted">Administra tu base de datos de clientes</p>
+        </div>
+      </div>
+      <div class="col-md-4">
+        <div class="feature-item text-center">
+          <i class="fas fa-scissors fa-2x text-primary mb-3"></i>
+          <h5>Servicios</h5>
+          <p class="text-muted">Cataloga todos tus servicios y precios</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,314 @@
+.welcome-section {
+  .welcome-title {
+    color: #2c3e50;
+    font-size: 2.5rem;
+    font-weight: 700;
+    margin-bottom: 0;
+
+    i {
+      background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+  }
+
+  .welcome-subtitle {
+    font-size: 1.1rem;
+    margin-bottom: 0;
+  }
+
+  .date-time {
+    background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+    padding: 12px 20px;
+    border-radius: 10px;
+    font-weight: 500;
+    color: #495057;
+    border: 1px solid #dee2e6;
+
+    i {
+      color: var(--primary-color);
+    }
+  }
+}
+
+.stats-card {
+  transition: all 0.3s ease;
+  border-radius: 15px;
+  overflow: hidden;
+
+  &:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1) !important;
+  }
+
+  .card-body {
+    padding: 1.5rem;
+  }
+
+  .stats-icon {
+    width: 60px;
+    height: 60px;
+    border-radius: 15px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 1.5rem;
+
+    &.bg-primary {
+      background: linear-gradient(135deg, #667eea, #764ba2);
+    }
+
+    &.bg-success {
+      background: linear-gradient(135deg, #11998e, #38ef7d);
+    }
+
+    &.bg-warning {
+      background: linear-gradient(135deg, #f093fb, #f5576c);
+    }
+
+    &.bg-info {
+      background: linear-gradient(135deg, #4facfe, #00f2fe);
+    }
+  }
+
+  .stats-content {
+    .stats-number {
+      font-size: 2rem;
+      font-weight: 700;
+      color: #2c3e50;
+      line-height: 1;
+    }
+
+    .stats-label {
+      color: #7f8c8d;
+      font-size: 0.9rem;
+      font-weight: 500;
+      margin-top: 5px;
+    }
+  }
+
+  .stats-trend {
+    font-size: 0.85rem;
+
+    .fa-arrow-up,
+    .fa-arrow-down,
+    .fa-minus {
+      font-size: 0.75rem;
+    }
+  }
+}
+
+.card {
+  border-radius: 15px;
+  
+  .card-header {
+    border-bottom: 1px solid #f1f3f4;
+    border-radius: 15px 15px 0 0 !important;
+
+    h5 {
+      color: #2c3e50;
+      font-weight: 600;
+
+      i {
+        font-size: 1.1rem;
+      }
+    }
+  }
+}
+
+.appointments-list {
+  .appointment-item {
+    padding: 20px 0;
+    border-bottom: 1px solid #f1f3f4;
+    transition: all 0.3s ease;
+
+    &:last-child {
+      border-bottom: none;
+    }
+
+    &:hover {
+      background-color: #f8f9fa;
+      margin: 0 -20px;
+      padding: 20px;
+      border-radius: 10px;
+    }
+
+    .appointment-time {
+      min-width: 80px;
+      text-align: center;
+
+      .time {
+        font-size: 1.1rem;
+        font-weight: 600;
+        color: var(--primary-color);
+      }
+
+      .duration {
+        font-size: 0.8rem;
+      }
+    }
+
+    .appointment-details {
+      .client-name {
+        color: #2c3e50;
+        font-size: 1rem;
+        margin-bottom: 2px;
+      }
+
+      .service-name {
+        font-size: 0.9rem;
+      }
+    }
+
+    .appointment-status {
+      .badge {
+        font-size: 0.75rem;
+        padding: 6px 12px;
+        border-radius: 20px;
+      }
+    }
+
+    .appointment-actions {
+      .btn {
+        width: 35px;
+        height: 35px;
+        border-radius: 8px;
+        padding: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+    }
+  }
+
+  .empty-state {
+    padding: 3rem 2rem;
+
+    i {
+      opacity: 0.3;
+    }
+
+    h6 {
+      margin-bottom: 1.5rem;
+    }
+  }
+}
+
+.activity-list {
+  .activity-item {
+    padding: 15px 0;
+    border-bottom: 1px solid #f1f3f4;
+
+    &:last-child {
+      border-bottom: none;
+    }
+
+    .activity-icon {
+      width: 40px;
+      height: 40px;
+      background-color: #f8f9fa;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .activity-content {
+      .activity-text {
+        font-size: 0.9rem;
+        color: #2c3e50;
+        line-height: 1.4;
+        margin-bottom: 2px;
+      }
+
+      .activity-time {
+        font-size: 0.8rem;
+      }
+    }
+  }
+}
+
+.btn {
+  border-radius: 8px;
+  font-weight: 500;
+  transition: all 0.3s ease;
+
+  &.btn-primary {
+    background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+    border: none;
+
+    &:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 5px 15px rgba(233, 30, 99, 0.3);
+    }
+  }
+
+  &.btn-outline-primary,
+  &.btn-outline-success,
+  &.btn-outline-info,
+  &.btn-outline-warning {
+    border-width: 2px;
+    
+    &:hover {
+      transform: translateY(-2px);
+    }
+  }
+}
+
+// Responsive adjustments
+@media (max-width: 768px) {
+  .welcome-section {
+    .welcome-title {
+      font-size: 2rem;
+    }
+
+    .date-time {
+      margin-top: 1rem;
+      text-align: center;
+    }
+  }
+
+  .stats-card .card-body {
+    padding: 1rem;
+  }
+
+  .appointment-item .d-flex {
+    flex-direction: column;
+    align-items: flex-start !important;
+
+    .appointment-time {
+      min-width: auto;
+      text-align: left;
+      margin-bottom: 10px;
+    }
+
+    .appointment-details {
+      margin-left: 0 !important;
+      margin-bottom: 10px;
+    }
+
+    .appointment-actions {
+      margin-left: 0 !important;
+      align-self: flex-end;
+    }
+  }
+}
+
+// Animation utilities
+.fade-in {
+  animation: fadeIn 0.5s ease-in;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

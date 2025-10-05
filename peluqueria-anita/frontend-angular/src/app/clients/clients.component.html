@@ -1,0 +1,424 @@
+<div class="container-fluid">
+  <!-- Header -->
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <h2><i class="fas fa-users"></i> Gestión de Clientes</h2>
+    <button 
+      class="btn btn-primary" 
+      (click)="openModal()">
+      <i class="fas fa-plus"></i> Nuevo Cliente
+    </button>
+  </div>
+
+  <!-- Estadísticas -->
+  <div class="row mb-4" *ngIf="stats">
+    <div class="col-md-3">
+      <div class="card bg-primary text-white">
+        <div class="card-body">
+          <div class="d-flex justify-content-between">
+            <div>
+              <h4>{{stats.total_clients || 0}}</h4>
+              <p class="mb-0">Total Clientes</p>
+            </div>
+            <div class="align-self-center">
+              <i class="fas fa-users fa-2x opacity-75"></i>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-3">
+      <div class="card bg-success text-white">
+        <div class="card-body">
+          <div class="d-flex justify-content-between">
+            <div>
+              <h4>{{stats.active_clients || 0}}</h4>
+              <p class="mb-0">Activos</p>
+            </div>
+            <div class="align-self-center">
+              <i class="fas fa-user-check fa-2x opacity-75"></i>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-3">
+      <div class="card bg-info text-white">
+        <div class="card-body">
+          <div class="d-flex justify-content-between">
+            <div>
+              <h4>{{stats.new_clients_this_month || 0}}</h4>
+              <p class="mb-0">Nuevos este mes</p>
+            </div>
+            <div class="align-self-center">
+              <i class="fas fa-user-plus fa-2x opacity-75"></i>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-3">
+      <div class="card bg-warning text-white">
+        <div class="card-body">
+          <div class="d-flex justify-content-between">
+            <div>
+              <h4>{{stats.inactive_clients || 0}}</h4>
+              <p class="mb-0">Inactivos</p>
+            </div>
+            <div class="align-self-center">
+              <i class="fas fa-user-times fa-2x opacity-75"></i>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Filtros -->
+  <div class="card mb-4">
+    <div class="card-body">
+      <div class="row">
+        <div class="col-md-4">
+          <label class="form-label">Buscar</label>
+          <input 
+            type="text" 
+            class="form-control" 
+            placeholder="Buscar por nombre, email o teléfono..."
+            [(ngModel)]="filters.search"
+            (input)="onSearchChange()">
+        </div>
+        <div class="col-md-2">
+          <label class="form-label">Estado</label>
+          <select 
+            class="form-control" 
+            [(ngModel)]="filters.is_active"
+            (change)="onFilterChange()">
+            <option [ngValue]="undefined">Todos</option>
+            <option [ngValue]="true">Activos</option>
+            <option [ngValue]="false">Inactivos</option>
+          </select>
+        </div>
+        <div class="col-md-2">
+          <label class="form-label">Género</label>
+          <select 
+            class="form-control" 
+            [(ngModel)]="filters.gender"
+            (change)="onFilterChange()">
+            <option value="">Todos</option>
+            <option value="female">Femenino</option>
+            <option value="male">Masculino</option>
+            <option value="other">Otro</option>
+          </select>
+        </div>
+        <div class="col-md-2">
+          <label class="form-label">Ordenar por</label>
+          <select 
+            class="form-control" 
+            [(ngModel)]="filters.sort_by"
+            (change)="onFilterChange()">
+            <option value="created_at">Fecha registro</option>
+            <option value="name">Nombre</option>
+            <option value="total_spent">Total gastado</option>
+          </select>
+        </div>
+        <div class="col-md-2">
+          <label class="form-label">Orden</label>
+          <select 
+            class="form-control" 
+            [(ngModel)]="filters.sort_order"
+            (change)="onFilterChange()">
+            <option value="desc">Descendente</option>
+            <option value="asc">Ascendente</option>
+          </select>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Tabla de Clientes -->
+  <div class="card">
+    <div class="card-body">
+      <div class="table-responsive">
+        <table class="table table-hover">
+          <thead>
+            <tr>
+              <th>Cliente</th>
+              <th>Contacto</th>
+              <th>Información</th>
+              <th>Estadísticas</th>
+              <th>Estado</th>
+              <th>Acciones</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let client of clients" [class.table-secondary]="!client.is_active">
+              <td>
+                <div>
+                  <strong>{{client.name}}</strong>
+                  <br>
+                  <small class="text-muted">
+                    ID: {{client.id}} | 
+                    Registro: {{formatDate(client.created_at)}}
+                  </small>
+                </div>
+              </td>
+              <td>
+                <div>
+                  <i class="fas fa-envelope"></i> {{client.email || 'No especificado'}}
+                  <br>
+                  <i class="fas fa-phone"></i> {{client.phone}}
+                </div>
+              </td>
+              <td>
+                <div>
+                  <i class="fas fa-venus-mars"></i> {{getGenderText(client.gender)}}
+                  <br>
+                  <i class="fas fa-birthday-cake"></i> {{formatDate(client.birth_date)}}
+                  <br>
+                  <small class="text-muted" *ngIf="client.address">
+                    <i class="fas fa-map-marker-alt"></i> {{client.address}}
+                  </small>
+                </div>
+              </td>
+              <td>
+                <div>
+                  <span class="badge bg-info">{{client.appointments_count || 0}} citas</span>
+                  <br>
+                  <span class="badge bg-success">{{formatCurrency(client.total_spent)}}</span>
+                  <br>
+                  <small class="text-muted" *ngIf="client.last_appointment">
+                    Última: {{formatDate(client.last_appointment)}}
+                  </small>
+                </div>
+              </td>
+              <td>
+                <span [class]="getStatusBadgeClass(client.is_active || false)">
+                  {{client.is_active ? 'Activo' : 'Inactivo'}}
+                </span>
+              </td>
+              <td>
+                <div class="btn-group">
+                  <button 
+                    class="btn btn-sm btn-outline-primary" 
+                    (click)="openModal(client)"
+                    title="Editar">
+                    <i class="fas fa-edit"></i>
+                  </button>
+                  <button 
+                    class="btn btn-sm btn-outline-info" 
+                    (click)="viewClientAppointments(client)"
+                    title="Ver historial">
+                    <i class="fas fa-history"></i>
+                  </button>
+                  <button 
+                    class="btn btn-sm" 
+                    [class.btn-outline-success]="!client.is_active"
+                    [class.btn-outline-warning]="client.is_active"
+                    (click)="toggleClientStatus(client)"
+                    [title]="client.is_active ? 'Desactivar' : 'Activar'">
+                    <i class="fas" [class.fa-check]="!client.is_active" [class.fa-ban]="client.is_active"></i>
+                  </button>
+                  <button 
+                    class="btn btn-sm btn-outline-danger" 
+                    (click)="confirmDelete(client)"
+                    title="Eliminar">
+                    <i class="fas fa-trash"></i>
+                  </button>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+        
+        <div *ngIf="loading" class="text-center py-4">
+          <div class="spinner-border" role="status">
+            <span class="visually-hidden">Cargando...</span>
+          </div>
+        </div>
+        
+        <div *ngIf="!loading && clients.length === 0" class="text-center py-4">
+          <p class="text-muted">No se encontraron clientes</p>
+        </div>
+      </div>
+
+      <!-- Paginación -->
+      <nav *ngIf="totalPages > 1">
+        <ul class="pagination justify-content-center">
+          <li class="page-item" [class.disabled]="currentPage === 1">
+            <button class="page-link" (click)="changePage(currentPage - 1)">Anterior</button>
+          </li>
+          <li class="page-item" [class.active]="i === currentPage" *ngFor="let i of [].constructor(totalPages); let idx = index">
+            <button class="page-link" (click)="changePage(idx + 1)">{{idx + 1}}</button>
+          </li>
+          <li class="page-item" [class.disabled]="currentPage === totalPages">
+            <button class="page-link" (click)="changePage(currentPage + 1)">Siguiente</button>
+          </li>
+        </ul>
+        <div class="text-center">
+          <small class="text-muted">
+            Mostrando {{clients.length}} de {{totalItems}} clientes
+          </small>
+        </div>
+      </nav>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Crear/Editar Cliente -->
+<div class="modal fade" [class.show]="showModal" [style.display]="showModal ? 'block' : 'none'" tabindex="-1">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <form [formGroup]="clientForm" (ngSubmit)="onSubmit()" novalidate>
+        <div class="modal-header">
+          <h5 class="modal-title">
+            {{editingClient ? 'Editar Cliente' : 'Nuevo Cliente'}}
+          </h5>
+          <button type="button" class="btn-close" (click)="closeModal()"></button>
+        </div>
+        <div class="modal-body">
+          <div class="row">
+            <div class="col-md-6">
+              <div class="mb-3">
+                <label class="form-label">Nombre completo *</label>
+                <input 
+                  type="text" 
+                  class="form-control" 
+                  formControlName="name"
+                  [class.is-invalid]="clientForm.get('name')?.invalid && clientForm.get('name')?.touched">
+                <div class="invalid-feedback">
+                  El nombre es requerido (mínimo 2 caracteres)
+                </div>
+              </div>
+            </div>
+            <div class="col-md-6">
+              <div class="mb-3">
+                <label class="form-label">Email</label>
+                <input 
+                  type="email" 
+                  class="form-control" 
+                  formControlName="email"
+                  [class.is-invalid]="clientForm.get('email')?.invalid && clientForm.get('email')?.touched">
+                <div class="invalid-feedback">
+                  Ingrese un email válido
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <div class="row">
+            <div class="col-md-6">
+              <div class="mb-3">
+                <label class="form-label">Teléfono *</label>
+                <input 
+                  type="tel" 
+                  class="form-control" 
+                  formControlName="phone"
+                  [class.is-invalid]="clientForm.get('phone')?.invalid && clientForm.get('phone')?.touched">
+                <div class="invalid-feedback">
+                  El teléfono es requerido
+                </div>
+              </div>
+            </div>
+            <div class="col-md-6">
+              <div class="mb-3">
+                <label class="form-label">Fecha de nacimiento</label>
+                <input 
+                  type="date" 
+                  class="form-control" 
+                  formControlName="birth_date">
+              </div>
+            </div>
+          </div>
+          
+          <div class="row">
+            <div class="col-md-6">
+              <div class="mb-3">
+                <label class="form-label">Género</label>
+                <select class="form-control" formControlName="gender">
+                  <option value="">No especificar</option>
+                  <option value="female">Femenino</option>
+                  <option value="male">Masculino</option>
+                  <option value="other">Otro</option>
+                </select>
+              </div>
+            </div>
+            <div class="col-md-6">
+              <div class="mb-3">
+                <label class="form-label">Estado</label>
+                <div class="form-check form-switch">
+                  <input 
+                    class="form-check-input" 
+                    type="checkbox" 
+                    formControlName="is_active">
+                  <label class="form-check-label">Cliente activo</label>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <div class="mb-3">
+            <label class="form-label">Dirección</label>
+            <textarea 
+              class="form-control" 
+              formControlName="address" 
+              rows="2"></textarea>
+          </div>
+          
+          <div class="mb-3">
+            <label class="form-label">Notas adicionales</label>
+            <textarea 
+              class="form-control" 
+              formControlName="notes" 
+              rows="3"
+              placeholder="Preferencias, alergias, observaciones especiales..."></textarea>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" (click)="closeModal()">
+            Cancelar
+          </button>
+          <button type="button" class="btn btn-info me-2" (click)="testForm()">
+            🧪 Test Formulario
+          </button>
+          <button type="submit" class="btn btn-primary" [disabled]="!clientForm.valid">
+            {{editingClient ? 'Actualizar' : 'Crear'}} Cliente
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Confirmar Eliminación -->
+<div class="modal fade" [class.show]="showDeleteModal" [style.display]="showDeleteModal ? 'block' : 'none'" tabindex="-1">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Confirmar Eliminación</h5>
+        <button type="button" class="btn-close" (click)="showDeleteModal = false"></button>
+      </div>
+      <div class="modal-body">
+        <p>¿Está seguro que desea eliminar al cliente <strong>{{deletingClient?.name}}</strong>?</p>
+        <p class="text-warning">
+          <i class="fas fa-exclamation-triangle"></i>
+          Esta acción no se puede deshacer.
+        </p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" (click)="showDeleteModal = false">
+          Cancelar
+        </button>
+        <button type="button" class="btn btn-danger" (click)="deleteClient()">
+          Eliminar Cliente
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Backdrop para modales -->
+<div 
+  class="modal-backdrop fade" 
+  [class.show]="showModal || showDeleteModal" 
+  *ngIf="showModal || showDeleteModal"
+  (click)="showModal ? closeModal() : (showDeleteModal = false)">
+</div>

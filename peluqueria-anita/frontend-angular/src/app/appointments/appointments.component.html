@@ -1,0 +1,702 @@
+<div class="container-fluid">
+  <!-- Header -->
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <h2 class="mb-0">
+      <i class="fas fa-calendar-alt me-2"></i>
+      Gestión de Citas
+    </h2>
+    <button 
+      type="button" 
+      class="btn btn-primary"
+      (click)="openModal()"
+      *ngIf="authService.hasPermission('create_appointments')">
+      <i class="fas fa-plus me-2"></i>
+      Nueva Cita
+    </button>
+  </div>
+
+  <!-- Estadísticas -->
+  <div class="row mb-4">
+    <div class="col-xl-3 col-md-6 mb-4">
+      <div class="card border-left-primary shadow h-100 py-2">
+        <div class="card-body">
+          <div class="row no-gutters align-items-center">
+            <div class="col mr-2">
+              <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
+                Citas Hoy
+              </div>
+              <div class="h5 mb-0 font-weight-bold text-gray-800">
+                {{ stats.today || 0 }}
+              </div>
+            </div>
+            <div class="col-auto">
+              <i class="fas fa-calendar-day fa-2x text-gray-300"></i>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-xl-3 col-md-6 mb-4">
+      <div class="card border-left-warning shadow h-100 py-2">
+        <div class="card-body">
+          <div class="row no-gutters align-items-center">
+            <div class="col mr-2">
+              <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">
+                Pendientes
+              </div>
+              <div class="h5 mb-0 font-weight-bold text-gray-800">
+                {{ stats.pending || 0 }}
+              </div>
+            </div>
+            <div class="col-auto">
+              <i class="fas fa-clock fa-2x text-gray-300"></i>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-xl-3 col-md-6 mb-4">
+      <div class="card border-left-success shadow h-100 py-2">
+        <div class="card-body">
+          <div class="row no-gutters align-items-center">
+            <div class="col mr-2">
+              <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
+                Confirmadas
+              </div>
+              <div class="h5 mb-0 font-weight-bold text-gray-800">
+                {{ stats.confirmed || 0 }}
+              </div>
+            </div>
+            <div class="col-auto">
+              <i class="fas fa-check-circle fa-2x text-gray-300"></i>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-xl-3 col-md-6 mb-4">
+      <div class="card border-left-info shadow h-100 py-2">
+        <div class="card-body">
+          <div class="row no-gutters align-items-center">
+            <div class="col mr-2">
+              <div class="text-xs font-weight-bold text-info text-uppercase mb-1">
+                Completadas
+              </div>
+              <div class="h5 mb-0 font-weight-bold text-gray-800">
+                {{ stats.completed || 0 }}
+              </div>
+            </div>
+            <div class="col-auto">
+              <i class="fas fa-check-double fa-2x text-gray-300"></i>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Filtros -->
+  <div class="card shadow mb-4">
+    <div class="card-header py-3">
+      <h6 class="m-0 font-weight-bold text-primary">Filtros</h6>
+    </div>
+    <div class="card-body">
+      <div class="row">
+        <div class="col-md-3 mb-3">
+          <label for="search" class="form-label">Buscar</label>
+          <input 
+            type="text" 
+            id="search"
+            class="form-control" 
+            placeholder="Cliente, notas..."
+            [(ngModel)]="filters.search"
+            (input)="onSearchChange()">
+        </div>
+
+        <div class="col-md-3 mb-3">
+          <label for="status" class="form-label">Estado</label>
+          <select 
+            id="status"
+            class="form-select" 
+            [(ngModel)]="filters.status"
+            (change)="onFilterChange()">
+            <option value="">Todos los estados</option>
+            <option *ngFor="let status of statusTypes" [value]="status.value">
+              {{ status.label }}
+            </option>
+          </select>
+        </div>
+
+        <div class="col-md-3 mb-3">
+          <label for="date" class="form-label">Fecha</label>
+          <input 
+            type="date" 
+            id="date"
+            class="form-control"
+            [(ngModel)]="filters.date"
+            (change)="onFilterChange()">
+        </div>
+
+        <div class="col-md-3 mb-3">
+          <label for="client" class="form-label">Cliente</label>
+          <select 
+            id="client"
+            class="form-select" 
+            [(ngModel)]="filters.client_id"
+            (change)="onFilterChange()">
+            <option value="">Todos los clientes</option>
+            <option *ngFor="let client of clients" [value]="client.id">
+              {{ client.name }}
+            </option>
+          </select>
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="col-md-3 mb-3">
+          <label for="sortBy" class="form-label">Ordenar por</label>
+          <select 
+            id="sortBy"
+            class="form-select" 
+            [(ngModel)]="filters.sort_by"
+            (change)="onFilterChange()">
+            <option value="appointment_date">Fecha de cita</option>
+            <option value="created_at">Fecha de creación</option>
+            <option value="total_amount">Monto total</option>
+            <option value="status">Estado</option>
+          </select>
+        </div>
+
+        <div class="col-md-3 mb-3">
+          <label for="sortOrder" class="form-label">Orden</label>
+          <select 
+            id="sortOrder"
+            class="form-select" 
+            [(ngModel)]="filters.sort_order"
+            (change)="onFilterChange()">
+            <option value="desc">Descendente</option>
+            <option value="asc">Ascendente</option>
+          </select>
+        </div>
+
+        <div class="col-md-3 mb-3">
+          <label for="perPage" class="form-label">Resultados por página</label>
+          <select 
+            id="perPage"
+            class="form-select" 
+            [(ngModel)]="filters.per_page"
+            (change)="onFilterChange()">
+            <option value="10">10</option>
+            <option value="15">15</option>
+            <option value="25">25</option>
+            <option value="50">50</option>
+          </select>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Tabla de Citas -->
+  <div class="card shadow mb-4">
+    <div class="card-header py-3 d-flex justify-content-between align-items-center">
+      <h6 class="m-0 font-weight-bold text-primary">
+        Lista de Citas ({{ totalItems }} resultados)
+      </h6>
+      <!-- Debug info temporal -->
+      <!-- <small class="text-muted">
+        Loading: {{ loading }} | Appointments: {{ appointments.length || 0 }} | Auth: {{ authService.isAuthenticated() }}
+      </small> -->
+    </div>
+    <div class="card-body">
+      <!-- Debug info más visible -->
+      <!-- <div class="alert alert-info mb-3">
+        <strong>Debug Info:</strong> 
+        Loading: {{ loading }} | 
+        Appointments: {{ appointments.length || 0 }} | 
+        Auth: {{ authService.isAuthenticated() }} |
+        Total Items: {{ totalItems }} |
+        Has Stats: {{ stats.today !== undefined }}
+      </div> -->
+      
+      <div class="table-responsive">
+        <!-- Mostrar siempre la tabla, independientemente del loading -->
+        <table class="table table-bordered" width="100%" cellspacing="0">
+          <thead>
+            <tr>
+              <th>Fecha</th>
+              <th>Cliente</th>
+              <th>Estilista</th>
+              <th>Horario</th>
+              <th>Estado</th>
+              <th>Monto</th>
+              <th>Acciones</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let appointment of appointments" 
+                [class.table-warning]="isToday(appointment.appointment_date)"
+                [class.table-danger]="isPast(appointment.appointment_date, appointment.start_time) && appointment.status === 'pending'">
+              <td>
+                <div class="fw-bold">{{ formatDate(appointment.appointment_date) }}</div>
+                <div class="text-muted small" *ngIf="isToday(appointment.appointment_date)">
+                  <i class="fas fa-calendar-day text-warning"></i> Hoy
+                </div>
+              </td>
+              <td>
+                <div class="fw-bold">{{ appointment.client?.name }}</div>
+                <div class="text-muted small">{{ appointment.client?.phone }}</div>
+              </td>
+              <td>
+                <div class="fw-bold">{{ appointment.user?.name || appointment.stylist?.name }}</div>
+              </td>
+              <td>
+                <div>{{ formatTime(appointment.start_time) }} - {{ formatTime(appointment.end_time) }}</div>
+                <div class="text-muted small" 
+                     *ngIf="isPast(appointment.appointment_date, appointment.start_time) && appointment.status === 'pending'">
+                  <i class="fas fa-exclamation-triangle text-danger"></i> Atrasada
+                </div>
+              </td>
+              <td>
+                <span [class]="getStatusBadgeClass(appointment.status)">
+                  {{ getStatusText(appointment.status) }}
+                </span>
+              </td>
+              <td class="fw-bold">${{ appointment.total_amount }}</td>
+              <td>
+                <div class="btn-group" role="group">
+                  <!-- Confirmar cita -->
+                  <button 
+                    type="button" 
+                    class="btn btn-sm btn-outline-success"
+                    (click)="confirmAppointment(appointment)"
+                    *ngIf="appointment.status === 'pending' && authService.hasPermission('update_appointments')"
+                    title="Confirmar cita">
+                    <i class="fas fa-check"></i>
+                  </button>
+
+                  <!-- Reprogramar -->
+                  <button 
+                    type="button" 
+                    class="btn btn-sm btn-outline-warning"
+                    (click)="openRescheduleModal(appointment)"
+                    *ngIf="(appointment.status === 'pending' || appointment.status === 'confirmed') && authService.hasPermission('update_appointments')"
+                    title="Reprogramar cita">
+                    <i class="fas fa-calendar-times"></i>
+                  </button>
+
+                  <!-- Cambio rápido de estado -->
+                  <div class="dropdown">
+                    <button 
+                      class="btn btn-sm btn-outline-secondary dropdown-toggle" 
+                      type="button" 
+                      id="statusDropdown{{ appointment.id }}"
+                      data-bs-toggle="dropdown" 
+                      aria-expanded="false"
+                      *ngIf="authService.hasPermission('update_appointments')">
+                      <i class="fas fa-edit"></i>
+                    </button>
+                    <ul class="dropdown-menu" [attr.aria-labelledby]="'statusDropdown' + appointment.id">
+                      <li *ngFor="let status of statusTypes">
+                        <a 
+                          class="dropdown-item" 
+                          href="#"
+                          (click)="updateStatusFromDropdown($event, appointment, status.value)"
+                          [class.active]="appointment.status === status.value">
+                          <span [class]="'badge bg-' + status.color + ' me-2'"></span>
+                          {{ status.label }}
+                        </a>
+                      </li>
+                    </ul>
+                  </div>
+
+                  <!-- Editar -->
+                  <button 
+                    type="button" 
+                    class="btn btn-sm btn-outline-primary"
+                    (click)="openModal(appointment)"
+                    *ngIf="authService.hasPermission('update_appointments')"
+                    title="Editar cita">
+                    <i class="fas fa-edit"></i>
+                  </button>
+
+                  <!-- Eliminar -->
+                  <button 
+                    type="button" 
+                    class="btn btn-sm btn-outline-danger"
+                    (click)="confirmDelete(appointment)"
+                    *ngIf="authService.hasPermission('delete_appointments')"
+                    title="Eliminar cita">
+                    <i class="fas fa-trash"></i>
+                  </button>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+
+        <!-- Mensaje de no hay datos -->
+        <div *ngIf="appointments && appointments.length === 0" class="text-center py-4">
+          <i class="fas fa-calendar-times fa-3x text-muted mb-3"></i>
+          <p class="text-muted">No se encontraron citas con los filtros seleccionados</p>
+        </div>
+      </div>
+
+      <!-- Loading -->
+      <div *ngIf="loading" class="d-flex justify-content-center py-4">
+        <div class="spinner-border text-primary" role="status">
+          <span class="visually-hidden">Cargando...</span>
+        </div>
+      </div>
+
+      <!-- Paginación -->
+      <nav *ngIf="totalPages > 1 && !loading" aria-label="Navegación de páginas">
+        <ul class="pagination justify-content-center">
+          <li class="page-item" [class.disabled]="currentPage === 1">
+            <a class="page-link" href="#" (click)="$event.preventDefault(); changePage(currentPage - 1)">
+              Anterior
+            </a>
+          </li>
+          
+          <li 
+            *ngFor="let page of [].constructor(totalPages); let i = index" 
+            class="page-item" 
+            [class.active]="currentPage === i + 1">
+            <a class="page-link" href="#" (click)="$event.preventDefault(); changePage(i + 1)">
+              {{ i + 1 }}
+            </a>
+          </li>
+          
+          <li class="page-item" [class.disabled]="currentPage === totalPages">
+            <a class="page-link" href="#" (click)="$event.preventDefault(); changePage(currentPage + 1)">
+              Siguiente
+            </a>
+          </li>
+        </ul>
+      </nav>
+    </div>
+  </div>
+</div>
+
+<!-- Modal para crear/editar cita -->
+<div class="modal fade" id="appointmentModal" tabindex="-1" [class.show]="showModal" [style.display]="showModal ? 'block' : 'none'">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <form [formGroup]="appointmentForm" (ngSubmit)="onSubmit()">
+        <div class="modal-header">
+          <h5 class="modal-title">
+            {{ editingAppointment ? 'Editar Cita' : 'Nueva Cita' }}
+          </h5>
+          <button type="button" class="btn-close" (click)="closeModal()"></button>
+        </div>
+        
+        <div class="modal-body">
+          <div class="row">
+            <!-- Información básica -->
+            <div class="col-md-6 mb-3">
+              <label for="client_id" class="form-label">Cliente *</label>
+              <select 
+                id="client_id"
+                class="form-select" 
+                formControlName="client_id"
+                [class.is-invalid]="appointmentForm.get('client_id')?.invalid && appointmentForm.get('client_id')?.touched">
+                <option value="">Seleccione un cliente</option>
+                <option *ngFor="let client of clients" [value]="client.id">
+                  {{ client.name }}
+                </option>
+              </select>
+              <div *ngIf="appointmentForm.get('client_id')?.invalid && appointmentForm.get('client_id')?.touched" class="invalid-feedback">
+                Cliente es requerido
+              </div>
+            </div>
+
+            <div class="col-md-6 mb-3">
+              <label for="user_id" class="form-label">Estilista *</label>
+              <select 
+                id="user_id"
+                class="form-select" 
+                formControlName="user_id"
+                (change)="onStylistChange()"
+                [class.is-invalid]="appointmentForm.get('user_id')?.invalid && appointmentForm.get('user_id')?.touched">
+                <option value="">Seleccione un estilista</option>
+                <option *ngFor="let stylist of stylists" [value]="stylist.id">{{ stylist.name }}</option>
+              </select>
+              <div *ngIf="appointmentForm.get('user_id')?.invalid && appointmentForm.get('user_id')?.touched" class="invalid-feedback">
+                Estilista es requerido
+              </div>
+            </div>
+
+            </div>
+
+            <!-- Servicios -->
+            <div class="col-md-12 mb-3">
+              <label for="services" class="form-label">Servicios *</label>
+              <div class="row">
+                <div class="col-12">
+                  <div class="border rounded p-3 bg-light">
+                    <div class="row" *ngIf="services.length > 0; else noServices">
+                      <div class="col-md-6 mb-2" *ngFor="let service of services">
+                        <div class="form-check">
+                          <input 
+                            class="form-check-input" 
+                            type="checkbox" 
+                            [value]="service.id" 
+                            [id]="'service_' + service.id"
+                            (change)="onServiceCheckboxChange($event, service.id)"
+                            [checked]="isServiceSelected(service.id)">
+                          <label class="form-check-label" [for]="'service_' + service.id">
+                            <strong>{{ service.name }}</strong>
+                            <br>
+                            <small class="text-muted">${{ service.price }}</small>
+                          </label>
+                        </div>
+                      </div>
+                    </div>
+                    <ng-template #noServices>
+                      <p class="text-muted mb-0">No hay servicios disponibles</p>
+                    </ng-template>
+                  </div>
+                  <div *ngIf="appointmentForm.get('services')?.invalid && appointmentForm.get('services')?.touched" class="invalid-feedback d-block">
+                    Debe seleccionar al menos un servicio
+                  </div>
+                  <small class="form-text text-muted">Seleccione uno o más servicios para la cita</small>
+                </div>
+              </div>
+            </div>
+
+            <!-- Fecha -->
+            <div class="col-md-6 mb-3">
+              <label for="appointment_date" class="form-label">Fecha de Cita *</label>
+              <input 
+                type="date" 
+                id="appointment_date"
+                class="form-control"
+                formControlName="appointment_date"
+                (change)="onDateChange()"
+                [min]="getTodayDate()"
+                [class.is-invalid]="appointmentForm.get('appointment_date')?.invalid && appointmentForm.get('appointment_date')?.touched">
+              <div *ngIf="appointmentForm.get('appointment_date')?.invalid && appointmentForm.get('appointment_date')?.touched" class="invalid-feedback">
+                Fecha de cita es requerida
+              </div>
+            </div>            <div class="col-md-6 mb-3">
+              <label for="status" class="form-label">Estado *</label>
+              <select 
+                id="status"
+                class="form-select" 
+                formControlName="status"
+                [class.is-invalid]="appointmentForm.get('status')?.invalid && appointmentForm.get('status')?.touched">
+                <option *ngFor="let status of statusTypes" [value]="status.value">
+                  {{ status.label }}
+                </option>
+              </select>
+            </div>
+
+            <!-- Horarios -->
+            <div class="col-md-6 mb-3">
+              <label for="start_time" class="form-label">Hora de Inicio *</label>
+              <select 
+                id="start_time"
+                class="form-select"
+                formControlName="start_time"
+                (change)="onStartTimeChange()"
+                [class.is-invalid]="appointmentForm.get('start_time')?.invalid && appointmentForm.get('start_time')?.touched">
+                <option value="">Seleccione una hora</option>
+                <option *ngFor="let slot of availableSlots" [value]="slot">
+                  {{ slot }}
+                </option>
+              </select>
+              <div *ngIf="appointmentForm.get('start_time')?.invalid && appointmentForm.get('start_time')?.touched" class="invalid-feedback">
+                Hora de inicio es requerida
+              </div>
+            </div>
+
+            <div class="col-md-6 mb-3">
+              <label for="end_time" class="form-label">Hora de Fin *</label>
+              <select
+                id="end_time"
+                class="form-select"
+                formControlName="end_time"
+                [class.is-invalid]="appointmentForm.get('end_time')?.invalid && appointmentForm.get('end_time')?.touched">
+                <option value="">Seleccione hora de fin</option>
+                <option *ngFor="let slot of availableSlots" [value]="slot">
+                  {{ slot }}
+                </option>
+              </select>
+              <div *ngIf="appointmentForm.get('end_time')?.invalid && appointmentForm.get('end_time')?.touched" class="invalid-feedback">
+                Hora de fin es requerida
+              </div>
+            </div>
+
+            <!-- Monto -->
+            <div class="col-md-6 mb-3">
+              <label for="total_amount" class="form-label">Monto Total *</label>
+              <div class="input-group">
+                <span class="input-group-text bg-success text-white">
+                  <i class="fas fa-dollar-sign"></i>
+                </span>
+                <input 
+                  type="number" 
+                  id="total_amount"
+                  class="form-control bg-light"
+                  formControlName="total_amount"
+                  min="0"
+                  step="0.01"
+                  readonly
+                  placeholder="Se calcula automáticamente"
+                  [class.is-invalid]="appointmentForm.get('total_amount')?.invalid && appointmentForm.get('total_amount')?.touched">
+              </div>
+              <div *ngIf="appointmentForm.get('total_amount')?.invalid && appointmentForm.get('total_amount')?.touched" class="invalid-feedback">
+                Monto total es requerido (se calcula automáticamente)
+              </div>
+              <small class="form-text text-success">
+                <i class="fas fa-calculator"></i> Calculado automáticamente según servicios seleccionados
+              </small>
+            </div>
+
+            <!-- Notas -->
+            <div class="col-md-12 mb-3">
+              <label for="notes" class="form-label">Notas</label>
+              <textarea 
+                id="notes"
+                class="form-control" 
+                formControlName="notes"
+                rows="3"
+                placeholder="Notas adicionales sobre la cita..."></textarea>
+            </div>
+          </div>
+        
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" (click)="closeModal()">
+            Cancelar
+          </button>
+          <button 
+            type="submit" 
+            class="btn btn-primary"
+            [disabled]="appointmentForm.invalid || loading">
+            <span *ngIf="loading" class="spinner-border spinner-border-sm me-2"></span>
+            {{ editingAppointment ? 'Actualizar' : 'Crear' }} Cita
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- Modal para reprogramar cita -->
+<div class="modal fade" id="rescheduleModal" tabindex="-1" [class.show]="showRescheduleModal" [style.display]="showRescheduleModal ? 'block' : 'none'">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <form [formGroup]="rescheduleForm" (ngSubmit)="onRescheduleSubmit()">
+        <div class="modal-header">
+          <h5 class="modal-title">Reprogramar Cita</h5>
+          <button type="button" class="btn-close" (click)="closeRescheduleModal()"></button>
+        </div>
+        
+        <div class="modal-body">
+          <div *ngIf="reschedulingAppointment" class="alert alert-info mb-3">
+            <strong>Cliente:</strong> {{ reschedulingAppointment.client?.name }}<br>
+            <strong>Fecha actual:</strong> {{ formatDate(reschedulingAppointment.appointment_date) }} 
+            {{ formatTime(reschedulingAppointment.start_time) }}
+          </div>
+
+          <div class="mb-3">
+            <label for="reschedule_date" class="form-label">Nueva Fecha *</label>
+            <input 
+              type="date" 
+              id="reschedule_date"
+              class="form-control"
+              formControlName="appointment_date"
+              (change)="onRescheduleDateChange()"
+              [class.is-invalid]="rescheduleForm.get('appointment_date')?.invalid && rescheduleForm.get('appointment_date')?.touched">
+          </div>
+
+          <div class="mb-3">
+            <label for="reschedule_start_time" class="form-label">Nueva Hora de Inicio *</label>
+            <select 
+              id="reschedule_start_time"
+              class="form-select"
+              formControlName="start_time"
+              [class.is-invalid]="rescheduleForm.get('start_time')?.invalid && rescheduleForm.get('start_time')?.touched">
+              <option value="">Seleccione una hora</option>
+              <option *ngFor="let slot of availableSlots" [value]="slot">
+                {{ slot }}
+              </option>
+            </select>
+          </div>
+
+          <div class="mb-3">
+            <label for="reschedule_end_time" class="form-label">Nueva Hora de Fin *</label>
+            <input 
+              type="time" 
+              id="reschedule_end_time"
+              class="form-control"
+              formControlName="end_time"
+              [class.is-invalid]="rescheduleForm.get('end_time')?.invalid && rescheduleForm.get('end_time')?.touched">
+          </div>
+
+          <div class="mb-3">
+            <label for="reschedule_reason" class="form-label">Motivo de Reprogramación *</label>
+            <textarea 
+              id="reschedule_reason"
+              class="form-control" 
+              formControlName="reason"
+              rows="3"
+              placeholder="Indique el motivo de la reprogramación..."
+              [class.is-invalid]="rescheduleForm.get('reason')?.invalid && rescheduleForm.get('reason')?.touched"></textarea>
+          </div>
+        </div>
+        
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" (click)="closeRescheduleModal()">
+            Cancelar
+          </button>
+          <button 
+            type="submit" 
+            class="btn btn-warning"
+            [disabled]="rescheduleForm.invalid || loading">
+            <span *ngIf="loading" class="spinner-border spinner-border-sm me-2"></span>
+            Reprogramar Cita
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- Modal de confirmación de eliminación -->
+<div class="modal fade" id="deleteModal" tabindex="-1" [class.show]="showDeleteModal" [style.display]="showDeleteModal ? 'block' : 'none'">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Confirmar Eliminación</h5>
+        <button type="button" class="btn-close" (click)="showDeleteModal = false"></button>
+      </div>
+      <div class="modal-body">
+        <p>¿Está seguro que desea eliminar esta cita?</p>
+        <div *ngIf="deletingAppointment" class="alert alert-info">
+          <strong>Cliente:</strong> {{ deletingAppointment.client?.name }}<br>
+          <strong>Fecha:</strong> {{ formatDate(deletingAppointment.appointment_date) }}<br>
+          <strong>Hora:</strong> {{ formatTime(deletingAppointment.start_time) }} - {{ formatTime(deletingAppointment.end_time) }}<br>
+          <strong>Monto:</strong> ${{ deletingAppointment.total_amount }}
+        </div>
+        <p class="text-danger"><small>Esta acción no se puede deshacer.</small></p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" (click)="showDeleteModal = false">
+          Cancelar
+        </button>
+        <button type="button" class="btn btn-danger" (click)="deleteAppointment()">
+          Eliminar
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Backdrop para modales -->
+<div 
+  *ngIf="showModal || showDeleteModal || showRescheduleModal" 
+  class="modal-backdrop fade show">
+</div>

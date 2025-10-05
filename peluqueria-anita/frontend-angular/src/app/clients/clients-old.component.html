@@ -1,0 +1,284 @@
+<!-- Header de la página -->
+<div class="page-header">
+  <div class="d-flex justify-content-between align-items-center">
+    <div>
+      <h1 class="h3 mb-1">
+        <i class="fas fa-users text-primary me-2"></i>
+        Gestión de Clientes
+      </h1>
+      <p class="text-muted mb-0">Administra la información de tus clientes</p>
+    </div>
+    <button 
+      class="btn btn-primary"
+      (click)="openModal()"
+      *ngIf="authService.isAdmin()">
+      <i class="fas fa-plus me-2"></i>
+      Nuevo Cliente
+    </button>
+  </div>
+</div>
+
+<!-- Filtros y búsqueda -->
+<div class="card shadow-sm mb-4">
+  <div class="card-body">
+    <div class="row align-items-center">
+      <div class="col-md-6">
+        <div class="input-group">
+          <span class="input-group-text">
+            <i class="fas fa-search"></i>
+          </span>
+          <input 
+            type="text" 
+            class="form-control" 
+            placeholder="Buscar por nombre, email o teléfono..."
+            [(ngModel)]="searchTerm"
+            (ngModelChange)="onSearch()">
+        </div>
+      </div>
+      <div class="col-md-6 text-md-end mt-2 mt-md-0">
+        <small class="text-muted">
+          Total: {{ filteredClients.length }} cliente(s)
+        </small>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Tabla de clientes -->
+<div class="card shadow-sm">
+  <div class="card-body">
+    <!-- Loading spinner -->
+    <div *ngIf="loading" class="text-center py-5">
+      <div class="spinner-border text-primary" role="status">
+        <span class="visually-hidden">Cargando...</span>
+      </div>
+      <p class="mt-2 text-muted">Cargando clientes...</p>
+    </div>
+
+    <!-- Tabla -->
+    <div *ngIf="!loading" class="table-responsive">
+      <table class="table table-hover">
+        <thead class="table-light">
+          <tr>
+            <th>Cliente</th>
+            <th>Contacto</th>
+            <th>Fecha de Nacimiento</th>
+            <th>Preferencias</th>
+            <th>Registro</th>
+            <th width="120">Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let client of filteredClients" class="align-middle">
+            <td>
+              <div class="d-flex align-items-center">
+                <div class="avatar-circle me-3">
+                  {{ client.name.charAt(0).toUpperCase() }}
+                </div>
+                <div>
+                  <h6 class="mb-1">{{ client.name }}</h6>
+                  <small class="text-muted">ID: {{ client.id }}</small>
+                </div>
+              </div>
+            </td>
+            <td>
+              <div>
+                <div class="mb-1">
+                  <i class="fas fa-envelope text-muted me-1"></i>
+                  <small>{{ client.email }}</small>
+                </div>
+                <div>
+                  <i class="fas fa-phone text-muted me-1"></i>
+                  <small>{{ client.phone }}</small>
+                </div>
+                <div *ngIf="client.address" class="mt-1">
+                  <i class="fas fa-map-marker-alt text-muted me-1"></i>
+                  <small class="text-muted">{{ client.address }}</small>
+                </div>
+              </div>
+            </td>
+            <td>
+              <span class="badge bg-light text-dark">
+                {{ formatDate(client.birth_date) }}
+              </span>
+            </td>
+            <td>
+              <div *ngIf="client.preferences; else noPreferences">
+                <small class="text-muted">{{ client.preferences }}</small>
+              </div>
+              <ng-template #noPreferences>
+                <span class="text-muted">-</span>
+              </ng-template>
+            </td>
+            <td>
+              <small class="text-muted">
+                {{ formatDate(client.created_at) }}
+              </small>
+            </td>
+            <td>
+              <div class="btn-group btn-group-sm" role="group">
+                <button 
+                  type="button" 
+                  class="btn btn-outline-primary"
+                  (click)="openModal(client)"
+                  title="Editar cliente">
+                  <i class="fas fa-edit"></i>
+                </button>
+                <button 
+                  type="button" 
+                  class="btn btn-outline-danger"
+                  (click)="deleteClient(client)"
+                  title="Eliminar cliente">
+                  <i class="fas fa-trash"></i>
+                </button>
+              </div>
+            </td>
+          </tr>
+          
+          <!-- Empty state -->
+          <tr *ngIf="filteredClients.length === 0">
+            <td colspan="6" class="text-center py-5">
+              <div class="text-muted">
+                <i class="fas fa-users fa-3x mb-3"></i>
+                <h5>No hay clientes</h5>
+                <p *ngIf="searchTerm; else noClientsMessage">
+                  No se encontraron clientes que coincidan con tu búsqueda.
+                </p>
+                <ng-template #noClientsMessage>
+                  <p>Aún no tienes clientes registrados.</p>
+                  <button 
+                    class="btn btn-primary"
+                    (click)="openModal()"
+                    *ngIf="authService.isAdmin()">
+                    <i class="fas fa-plus me-2"></i>
+                    Agregar Primer Cliente
+                  </button>
+                </ng-template>
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- Modal para crear/editar cliente -->
+<div class="modal fade" 
+     [class.show]="showModal" 
+     [style.display]="showModal ? 'block' : 'none'"
+     tabindex="-1">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">
+          <i class="fas fa-user me-2"></i>
+          {{ editingClient ? 'Editar Cliente' : 'Nuevo Cliente' }}
+        </h5>
+        <button type="button" class="btn-close" (click)="closeModal()"></button>
+      </div>
+      
+      <form [formGroup]="clientForm" (ngSubmit)="saveClient()">
+        <div class="modal-body">
+          <div class="row">
+            <!-- Nombre -->
+            <div class="col-md-6 mb-3">
+              <label class="form-label">
+                Nombre completo <span class="text-danger">*</span>
+              </label>
+              <input 
+                type="text" 
+                class="form-control"
+                [class.is-invalid]="clientForm.get('name')?.invalid && clientForm.get('name')?.touched"
+                formControlName="name"
+                placeholder="Ingresa el nombre completo">
+              <div class="invalid-feedback">
+                {{ getFormError('name') }}
+              </div>
+            </div>
+            
+            <!-- Email -->
+            <div class="col-md-6 mb-3">
+              <label class="form-label">
+                Correo electrónico <span class="text-danger">*</span>
+              </label>
+              <input 
+                type="email" 
+                class="form-control"
+                [class.is-invalid]="clientForm.get('email')?.invalid && clientForm.get('email')?.touched"
+                formControlName="email"
+                placeholder="cliente@email.com">
+              <div class="invalid-feedback">
+                {{ getFormError('email') }}
+              </div>
+            </div>
+            
+            <!-- Teléfono -->
+            <div class="col-md-6 mb-3">
+              <label class="form-label">
+                Teléfono <span class="text-danger">*</span>
+              </label>
+              <input 
+                type="tel" 
+                class="form-control"
+                [class.is-invalid]="clientForm.get('phone')?.invalid && clientForm.get('phone')?.touched"
+                formControlName="phone"
+                placeholder="+34 666 123 456">
+              <div class="invalid-feedback">
+                {{ getFormError('phone') }}
+              </div>
+            </div>
+            
+            <!-- Fecha de nacimiento -->
+            <div class="col-md-6 mb-3">
+              <label class="form-label">Fecha de nacimiento</label>
+              <input 
+                type="date" 
+                class="form-control"
+                formControlName="birth_date">
+            </div>
+            
+            <!-- Dirección -->
+            <div class="col-12 mb-3">
+              <label class="form-label">Dirección</label>
+              <input 
+                type="text" 
+                class="form-control"
+                formControlName="address"
+                placeholder="Calle, número, ciudad...">
+            </div>
+            
+            <!-- Preferencias -->
+            <div class="col-12 mb-3">
+              <label class="form-label">Preferencias y notas</label>
+              <textarea 
+                class="form-control" 
+                rows="3"
+                formControlName="preferences"
+                placeholder="Servicios preferidos, alergias, horarios preferidos, etc."></textarea>
+            </div>
+          </div>
+        </div>
+        
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" (click)="closeModal()">
+            Cancelar
+          </button>
+          <button 
+            type="submit" 
+            class="btn btn-primary"
+            [disabled]="clientForm.invalid || loading">
+            <span *ngIf="loading" class="spinner-border spinner-border-sm me-2"></span>
+            {{ editingClient ? 'Actualizar' : 'Crear' }} Cliente
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- Modal backdrop -->
+<div class="modal-backdrop fade" 
+     [class.show]="showModal" 
+     *ngIf="showModal"
+     (click)="closeModal()"></div>

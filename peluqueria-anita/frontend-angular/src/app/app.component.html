@@ -1,0 +1,136 @@
+<!-- Navbar principal - Solo se muestra si el usuario está autenticado -->
+<nav class="navbar navbar-expand-lg navbar-dark" 
+     style="background: linear-gradient(135deg, #e91e63, #673ab7);" 
+     *ngIf="isAuthenticated">
+  <div class="container-fluid">
+    <a class="navbar-brand d-flex align-items-center" routerLink="/dashboard">
+      <i class="fas fa-cut me-2"></i>
+      <span class="fw-bold">{{ title }}</span>
+      <small class="text-white-50 ms-2 d-none d-md-inline" 
+             style="font-size: 0.7rem; opacity: 0.6; font-family: 'Courier New', monospace;">
+        by DG
+      </small>
+    </a>
+    
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+    
+    <div class="collapse navbar-collapse" id="navbarNav">
+      <ul class="navbar-nav me-auto">
+        <li class="nav-item">
+          <a class="nav-link" routerLink="/dashboard" routerLinkActive="active">
+            <i class="fas fa-tachometer-alt me-1"></i>Dashboard
+          </a>
+        </li>
+        
+        <li class="nav-item">
+          <a class="nav-link" routerLink="/appointments" routerLinkActive="active">
+            <i class="fas fa-calendar-alt me-1"></i>Citas
+          </a>
+        </li>
+
+        <li class="nav-item">
+          <a class="nav-link" routerLink="/attentions" routerLinkActive="active">
+            <i class="fas fa-hand-sparkles me-1"></i>Atenciones
+          </a>
+        </li>
+        
+        <!-- Solo admins pueden ver clientes y servicios -->
+        <li class="nav-item" *ngIf="isAdmin()">
+          <a class="nav-link" routerLink="/clients" routerLinkActive="active">
+            <i class="fas fa-users me-1"></i>Clientes
+          </a>
+        </li>
+        
+        <li class="nav-item" *ngIf="isAdmin()">
+          <a class="nav-link" routerLink="/services" routerLinkActive="active">
+            <i class="fas fa-scissors me-1"></i>Servicios
+          </a>
+        </li>
+      </ul>
+      
+      <ul class="navbar-nav">
+        <li class="nav-item dropdown">
+          <a class="nav-link dropdown-toggle d-flex align-items-center" 
+             href="#" 
+             id="navbarDropdown" 
+             role="button" 
+             data-bs-toggle="dropdown">
+            <i class="fas fa-user-circle me-1"></i>
+            {{ currentUser?.name || 'Usuario' }}
+            <span class="badge bg-light text-dark ms-2">{{ currentUser?.role | titlecase }}</span>
+          </a>
+          <ul class="dropdown-menu">
+            <li><h6 class="dropdown-header">{{ currentUser?.email }}</h6></li>
+            <li><hr class="dropdown-divider"></li>
+            <li><a class="dropdown-item" href="#"><i class="fas fa-user me-2"></i>Mi Perfil</a></li>
+            <li><a class="dropdown-item" href="#"><i class="fas fa-cog me-2"></i>Configuración</a></li>
+            <li><hr class="dropdown-divider"></li>
+            <li>
+              <a class="dropdown-item" href="#" (click)="logout()">
+                <i class="fas fa-sign-out-alt me-2"></i>Cerrar Sesión
+              </a>
+            </li>
+          </ul>
+        </li>
+      </ul>
+    </div>
+  </div>
+</nav>
+
+<!-- Breadcrumb - Solo para usuarios autenticados -->
+<nav aria-label="breadcrumb" class="breadcrumb-nav bg-light py-2" *ngIf="isAuthenticated">
+  <div class="container-fluid d-flex justify-content-between align-items-center">
+    <ol class="breadcrumb mb-0">
+      <li class="breadcrumb-item">
+        <a routerLink="/dashboard" class="text-decoration-none">Inicio</a>
+      </li>
+      <li class="breadcrumb-item active" aria-current="page">Dashboard</li>
+    </ol>
+    <small class="text-muted d-none d-lg-block" 
+           style="font-size: 0.65rem; opacity: 0.5; font-family: 'Courier New', monospace;">
+      <i class="fas fa-copyright me-1"></i>Diego González
+    </small>
+  </div>
+</nav>
+
+<!-- Contenido principal -->
+<main class="main-content" [class.authenticated]="isAuthenticated">
+  <div class="container-fluid" [class.py-4]="isAuthenticated">
+    <router-outlet></router-outlet>
+  </div>
+</main>
+
+<!-- Footer - Solo para usuarios autenticados -->
+<footer class="footer bg-dark text-light py-3 mt-auto" *ngIf="isAuthenticated">
+  <div class="container-fluid">
+    <div class="row align-items-center">
+      <div class="col-md-6">
+        <p class="mb-0">
+          &copy; 2025 {{ title }}. Todos los derechos reservados.
+        </p>
+        <small class="text-muted">
+          <i class="fas fa-code me-1"></i>
+          Desarrollado con ❤️ por <strong class="text-info">Diego González (DG)</strong>
+        </small>
+      </div>
+      <div class="col-md-6 text-md-end">
+        <div class="d-flex flex-column align-items-md-end">
+          <small class="mb-1">
+            Versión 1.0.0 | 
+            <a href="#" class="text-light text-decoration-none">Soporte</a> |
+            <a href="#" class="text-light text-decoration-none">Ayuda</a>
+          </small>
+          <div class="developer-badge">
+            <span class="badge bg-gradient text-white px-3 py-1" 
+                  style="background: linear-gradient(45deg, #667eea 0%, #764ba2 100%); font-family: 'Courier New', monospace;">
+              <i class="fas fa-laptop-code me-1"></i>
+              DG.dev
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</footer>
