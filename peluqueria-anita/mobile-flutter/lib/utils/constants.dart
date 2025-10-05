@@ -37,8 +37,28 @@ class AppColors {
 }
 
 class AppConstants {
-  // API - Usa localhost para todas las plataformas (compatible con el servidor)
-  static const String baseUrl = 'http://localhost:8001/api';
+  // API - Configuración dinámica según entorno
+  static String get baseUrl {
+    if (kIsWeb) {
+      // En web, verifica si estamos en localhost (desarrollo) o en producción
+      final currentUrl = Uri.base.toString();
+      if (currentUrl.contains('localhost') || currentUrl.contains('127.0.0.1')) {
+        return 'http://localhost:8001/api'; // Desarrollo local
+      }
+      // Producción en Vercel
+      return 'https://pruebatek-production.up.railway.app/api';
+    } else if (defaultTargetPlatform == TargetPlatform.iOS || 
+               defaultTargetPlatform == TargetPlatform.macOS) {
+      // En iOS/macOS nativos
+      return 'http://localhost:8001/api';
+    } else if (defaultTargetPlatform == TargetPlatform.android) {
+      // En Android emulador
+      return 'http://10.0.2.2:8001/api';
+    }
+    // Por defecto
+    return 'http://localhost:8001/api';
+  }
+  
   static const String storageUrl = 'http://localhost:8000/storage';
   
   // Timeouts
