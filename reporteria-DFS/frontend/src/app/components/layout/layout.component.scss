@@ -1,0 +1,127 @@
+.layout-container {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+}
+
+.navbar {
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+
+  .menu-button {
+    margin-right: 16px;
+
+    @media (min-width: 768px) {
+      display: none;
+    }
+  }
+
+  .logo-section {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+
+    .logo-icon {
+      font-size: 32px;
+      width: 32px;
+      height: 32px;
+    }
+
+    .app-title {
+      font-size: 20px;
+      font-weight: 500;
+    }
+  }
+
+  .spacer {
+    flex: 1 1 auto;
+  }
+
+  .nav-link {
+    margin: 0 4px;
+    display: none;
+
+    @media (min-width: 768px) {
+      display: inline-flex;
+    }
+
+    mat-icon {
+      margin-right: 4px;
+    }
+
+    &.active-link {
+      background-color: rgba(255, 255, 255, 0.1);
+    }
+  }
+
+  .user-button {
+    margin-left: 8px;
+  }
+}
+
+.sidenav-container {
+  flex: 1;
+  display: flex;
+}
+
+.sidenav {
+  width: 280px;
+  padding-top: 16px;
+}
+
+.main-content {
+  display: flex;
+  flex-direction: column;
+  min-height: 100%;
+}
+
+.content-wrapper {
+  flex: 1;
+  padding: 24px;
+  background-color: #f5f5f5;
+  overflow-y: auto;
+
+  @media (max-width: 600px) {
+    padding: 16px;
+  }
+}
+
+.footer {
+  background-color: #fff;
+  border-top: 1px solid #e0e0e0;
+  padding: 16px 24px;
+  text-align: center;
+
+  p {
+    margin: 0;
+    color: #666;
+    font-size: 14px;
+  }
+}
+
+.user-info {
+  padding: 16px;
+
+  .user-name {
+    font-weight: 500;
+    color: #333;
+    margin-bottom: 4px;
+  }
+
+  .user-email {
+    font-size: 14px;
+    color: #666;
+  }
+}
+
+.active-link {
+  background-color: rgba(0, 0, 0, 0.04);
+}
+
+@media (max-width: 767px) {
+  .link-text {
+    display: none;
+  }
+}

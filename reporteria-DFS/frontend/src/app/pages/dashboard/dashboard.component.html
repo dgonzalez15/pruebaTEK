@@ -1,0 +1,172 @@
+<div class="dashboard-container">
+  <div class="page-header">
+    <h1>Dashboard Consolidado</h1>
+    <p class="subtitle">Vista general de métricas y estadísticas</p>
+  </div>
+
+  <!-- Filtros -->
+  <mat-card class="filter-card">
+    <mat-card-content>
+      <form [formGroup]="filterForm" (ngSubmit)="applyFilters()" class="filter-form">
+        <div class="quick-filters">
+          <button mat-button type="button" (click)="setQuickFilter('today')">Hoy</button>
+          <button mat-button type="button" (click)="setQuickFilter('week')">Última Semana</button>
+          <button mat-button type="button" (click)="setQuickFilter('month')">Último Mes</button>
+          <button mat-button type="button" (click)="setQuickFilter('quarter')">Último Trimestre</button>
+          <button mat-button type="button" (click)="setQuickFilter('year')">Último Año</button>
+        </div>
+
+        <div class="date-filters">
+          <mat-form-field appearance="outline">
+            <mat-label>Fecha Inicio</mat-label>
+            <input matInput type="date" formControlName="start_date" />
+          </mat-form-field>
+
+          <mat-form-field appearance="outline">
+            <mat-label>Fecha Fin</mat-label>
+            <input matInput type="date" formControlName="end_date" />
+          </mat-form-field>
+
+          <button mat-raised-button color="primary" type="submit" [disabled]="loading">
+            <mat-icon>search</mat-icon>
+            Aplicar Filtros
+          </button>
+        </div>
+      </form>
+    </mat-card-content>
+  </mat-card>
+
+  <!-- Loading -->
+  <div *ngIf="loading" class="loading-container">
+    <mat-spinner></mat-spinner>
+  </div>
+
+  <!-- Error -->
+  <mat-card *ngIf="error" class="error-card">
+    <mat-card-content>
+      <mat-icon color="warn">error</mat-icon>
+      <p>{{ error }}</p>
+    </mat-card-content>
+  </mat-card>
+
+  <!-- Content -->
+  <div *ngIf="!loading && report" class="dashboard-content">
+    <!-- Métricas -->
+    <div class="metrics-grid">
+      <mat-card class="metric-card">
+        <mat-card-content>
+          <div class="metric-icon" style="background-color: #e3f2fd;">
+            <mat-icon style="color: #2196f3;">people</mat-icon>
+          </div>
+          <div class="metric-info">
+            <h3>Clientes</h3>
+            <p class="metric-value">{{ report.metrics.clients.total }}</p>
+            <p class="metric-detail">{{ report.metrics.clients.new_in_period }} nuevos</p>
+          </div>
+        </mat-card-content>
+      </mat-card>
+
+      <mat-card class="metric-card">
+        <mat-card-content>
+          <div class="metric-icon" style="background-color: #f3e5f5;">
+            <mat-icon style="color: #9c27b0;">event</mat-icon>
+          </div>
+          <div class="metric-info">
+            <h3>Citas</h3>
+            <p class="metric-value">{{ report.metrics.appointments.total }}</p>
+            <p class="metric-detail">{{ formatPercentage(report.metrics.appointments.completion_rate) }} completadas</p>
+          </div>
+        </mat-card-content>
+      </mat-card>
+
+      <mat-card class="metric-card">
+        <mat-card-content>
+          <div class="metric-icon" style="background-color: #e8f5e9;">
+            <mat-icon style="color: #4caf50;">work</mat-icon>
+          </div>
+          <div class="metric-info">
+            <h3>Atenciones</h3>
+            <p class="metric-value">{{ report.metrics.attentions.total }}</p>
+            <p class="metric-detail">{{ report.metrics.attentions.average_per_day }} promedio/día</p>
+          </div>
+        </mat-card-content>
+      </mat-card>
+
+      <mat-card class="metric-card">
+        <mat-card-content>
+          <div class="metric-icon" style="background-color: #fff3e0;">
+            <mat-icon style="color: #ff9800;">attach_money</mat-icon>
+          </div>
+          <div class="metric-info">
+            <h3>Ingresos Totales</h3>
+            <p class="metric-value">{{ formatCurrency(report.metrics.revenue.total) }}</p>
+            <p class="metric-detail">{{ formatCurrency(report.metrics.revenue.average_per_day) }}/día</p>
+          </div>
+        </mat-card-content>
+      </mat-card>
+    </div>
+
+    <!-- Gráficos -->
+    <div class="charts-grid">
+      <mat-card class="chart-card">
+        <mat-card-header>
+          <mat-card-title>Servicios Más Solicitados</mat-card-title>
+        </mat-card-header>
+        <mat-card-content>
+          <div class="chart-container">
+            <canvas #servicesChart></canvas>
+          </div>
+        </mat-card-content>
+      </mat-card>
+
+      <mat-card class="chart-card">
+        <mat-card-header>
+          <mat-card-title>Tendencia de Ventas</mat-card-title>
+        </mat-card-header>
+        <mat-card-content>
+          <div class="chart-container">
+            <canvas #salesChart></canvas>
+          </div>
+        </mat-card-content>
+      </mat-card>
+    </div>
+
+    <!-- Top Clientes -->
+    <mat-card class="table-card">
+      <mat-card-header>
+        <mat-card-title>Top 10 Mejores Clientes</mat-card-title>
+      </mat-card-header>
+      <mat-card-content>
+        <table mat-table [dataSource]="report.rankings.top_clients" class="full-width-table">
+          <ng-container matColumnDef="position">
+            <th mat-header-cell *matHeaderCellDef>#</th>
+            <td mat-cell *matCellDef="let element; let i = index">{{ i + 1 }}</td>
+          </ng-container>
+
+          <ng-container matColumnDef="client">
+            <th mat-header-cell *matHeaderCellDef>Cliente</th>
+            <td mat-cell *matCellDef="let element">
+              <div>
+                <strong>{{ element.full_name }}</strong><br>
+                <small>{{ element.email }}</small>
+              </div>
+            </td>
+          </ng-container>
+
+          <ng-container matColumnDef="appointments">
+            <th mat-header-cell *matHeaderCellDef>Citas</th>
+            <td mat-cell *matCellDef="let element">{{ element.appointments_count }}</td>
+          </ng-container>
+
+          <ng-container matColumnDef="total">
+            <th mat-header-cell *matHeaderCellDef>Total Gastado</th>
+            <td mat-cell *matCellDef="let element">{{ formatCurrency(element.total_spent) }}</td>
+          </ng-container>
+
+          <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+          <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+        </table>
+      </mat-card-content>
+    </mat-card>
+  </div>
+</div>
